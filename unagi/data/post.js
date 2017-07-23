@@ -10,3 +10,4 @@ var schema = new Schema({
 });
 
 module.exports = mongoose.model('Post', schema);
+
