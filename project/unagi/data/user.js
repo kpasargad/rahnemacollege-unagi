@@ -6,4 +6,4 @@ var schema = new Schema({
     token : {type : String}
 });
 
-model.exports = mongoose.model('Product', schema);
+model.exports = mongoose.model('User', schema);
