@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-//alo
+//
 /* GET home page. */
  router.get('/send', function (req , res , next) {
      var post = req.query.userPost
