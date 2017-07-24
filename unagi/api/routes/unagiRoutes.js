@@ -8,6 +8,8 @@ module.exports = function(app) {
     .get(unagi.list_all_posts)
     .post(unagi.create_a_post);
 
+    app.route('/users')
+        .post(unagi.create_a_user);
 
   app.route('/posts/:postId')
     .get(unagi.read_a_post)

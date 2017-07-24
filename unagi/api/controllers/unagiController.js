@@ -2,7 +2,8 @@
 
 
 var mongoose = require('mongoose'),
-  Post = mongoose.model('Posts');
+  Post = mongoose.model('Posts'),
+  User = mongoose.model('Users');
 
 exports.list_all_posts = function(req, res) {
   Post.find({}, function(err, post) {
@@ -53,4 +54,14 @@ exports.delete_a_post = function(req, res) {
       res.send(err);
     res.json({ message: 'Post successfully deleted' });
   });
+};
+
+
+exports.create_a_user = function(req, res) {
+    var new_user = new User(req.body);
+    new_user.save(function(err, user) {
+        if (err)
+            res.send(err);
+        res.json(user);
+    });
 };

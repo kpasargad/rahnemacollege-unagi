@@ -4,15 +4,37 @@ var Schema = mongoose.Schema;
 
 
 var PostSchema = new Schema({
+    id :{
+        type : Number,
+        require : true
+    },
     text: {
         type: String,
-        default: "Just for TEST"
+        required : true
     },
-    location: String,
-    created_date:{
-        type:Date,
-        default:Date.now
+    location:{
+        pointX: {
+            type : Number,
+            required : true
+        },
+        pointY : {
+            type : Number,
+            require : true
+        }
     }
 });
 
-module.exports = mongoose.model('Posts', PostSchema);
+var UserSchema = new Schema({
+    id :{
+        type : Number,
+        require : true
+    },
+   token:{
+       type : String,
+       required : true
+   }
+});
+module.exports = {
+    posts : mongoose.model('Posts', PostSchema),
+    users : mongoose.model('Users', UserSchema)
+};

@@ -2,7 +2,8 @@ var express = require('express'),
   app = express(),
   port = process.env.PORT || 3000,
   mongoose = require('mongoose'),
-  Post = require('./api/models/unagiModel'),
+  Post = require('./api/models/unagiModel').posts,
+  User = require('./api/models/unagiModel').users,
   bodyParser = require('body-parser');
   
 mongoose.Promise = global.Promise;
