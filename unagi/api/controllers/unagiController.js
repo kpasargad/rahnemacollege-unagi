@@ -2,66 +2,103 @@
 
 
 var mongoose = require('mongoose'),
-  Post = mongoose.model('Posts'),
-  User = mongoose.model('Users');
+    Post = mongoose.model('Posts'),
+    User = mongoose.model('Users');
 ///
-exports.list_all_posts = function(req, res) {
-  Post.find({}, function(err, post) {
-    if (err)
-      res.send(err);
-    res.json(post);
-  });
-};
-
-
-
-
-exports.create_a_post = function(req, res) {
-  var new_post = new Post(req.body);
-  new_post.save(function(err, post) {
-    if (err)
-      res.send(err);
-    res.json(post);
-  });
-};
-
-
-exports.read_a_post = function(req, res) {
-  Post.findById(req.params.postId, function(err, post) {
-    if (err)
-      res.send(err);
-    res.json(post);
-  });
-};
-
-
-exports.update_a_post = function(req, res) {
-  Post.findOneAndUpdate({_id: req.params.postId}, req.body, {new: true}, function(err, post) {
-    if (err)
-      res.send(err);
-    res.json(post);
-  });
-};
-
-
-exports.delete_a_post = function(req, res) {
-
-
-  Post.remove({
-    _id: req.params.postId
-  }, function(err, post) {
-    if (err)
-      res.send(err);
-    res.json({ message: 'Post successfully deleted' });
-  });
-};
-
-
-exports.create_a_user = function(req, res) {
-    var new_user = new User(req.body);
-    new_user.save(function(err, user) {
+var list_all_posts = function (req, res) {
+    Post.find({}, function (err, post) {
         if (err)
             res.send(err);
-        res.json(user);
+        res.json(post);
     });
+};
+exports.list_all_posts = list_all_posts;
+
+
+exports.create_a_post = function (req, res) {
+    var new_post = new Post(req.body);
+    new_post.save(function (err, post) {
+        if (err)
+            res.send(err);
+        res.json(post);
+    });
+};
+
+
+exports.read_a_post = function (req, res) {
+    Post.findById(req.params.postId, function (err, post) {
+        if (err)
+            res.send(err);
+        res.json(post);
+    });
+};
+
+
+exports.update_a_post = function (req, res) {
+    Post.findOneAndUpdate({_id: req.params.postId}, req.body, {new: true}, function (err, post) {
+        if (err)
+            res.send(err);
+        res.json(post);
+    });
+};
+
+
+exports.delete_a_post = function (req, res) {
+
+
+    Post.remove({
+        _id: req.params.postId
+    }, function (err, post) {
+        if (err)
+            res.send(err);
+        res.json({message: 'Post successfully deleted'});
+    });
+};
+
+var create_a_user = function (req, res) {
+    var token = req.params.token;
+    User.findOne().sort({id: -1}).exec(function (err, person) {
+        if (err) {
+            res.send(err)
+        }
+        else {
+            var id = 1;
+            if (person === null) {
+                //do nothing
+            } else {
+                id = person.id + 1;
+            }
+
+            var new_user = new User({
+                token: req.params.token,
+                id: id
+            });
+
+            new_user.save(function (err, user) {
+                if (err)
+                    res.send(err);
+                res.json(user);
+            });
+        }
+    });
+};
+
+//exports.create_a_user = create_a_user;
+
+exports.check_token = function (req, res) {
+    console.log("CHECKING TOKEN");
+    console.log(req.params.token);
+    User.findOne({'token': req.params.token}, function (err, person) {
+        if (err) {
+            res.send(err);
+        }
+        if (person === null) {
+            console.log("creating new user");
+            create_a_user(req, res)
+        } else {
+            console.log(person);
+            console.log("submitted user");
+            list_all_posts(req, res)
+        }
+    })
 };
