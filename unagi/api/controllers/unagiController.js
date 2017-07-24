@@ -4,7 +4,7 @@
 var mongoose = require('mongoose'),
   Post = mongoose.model('Posts'),
   User = mongoose.model('Users');
-
+///
 exports.list_all_posts = function(req, res) {
   Post.find({}, function(err, post) {
     if (err)
