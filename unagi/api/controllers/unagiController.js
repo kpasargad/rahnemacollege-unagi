@@ -23,9 +23,9 @@ exports.create_a_post = function (req, res) {
         if (err) {
             res.send(err)
         }
-        else if(req.body.location === undefined) {
+        else if (req.body.location === undefined) {
             res.send("No location has been sent");
-        }else {
+        } else {
             var id = 1;
             if (post_with_highest_id === null) {
                 //do nothing
@@ -40,18 +40,21 @@ exports.create_a_post = function (req, res) {
 
             var error = new_post.validateSync();
             //console.log(error);
-            if(error === undefined){
-                new_post.save(function (err, post) {
-                    if (err)
-                        res.send(err);
+            //if (error === undefined) {
+            new_post.save(function (err, post) {
+                if (err) {
+                    res.send(err);
+                }
+                else {
                     res.json(post);
-                });
-                console.log("new post:" + new_post);
-            }
-            else {
-                console.log("new post is not valid.")
-                res.send(error.errors);
-            }
+                }
+            });
+            console.log("new post:" + new_post);
+            // }
+            //  else {
+            //      console.log("new post is not valid.");
+            //      res.send(error.errors);
+            //  }
         }
     });
 };
