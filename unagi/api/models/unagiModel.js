@@ -6,7 +6,7 @@ var Schema = mongoose.Schema;
 var PostSchema = new Schema({
     id: {
         type: Number,
-        require: true
+        required: true
     },
     text: {
         type: String,
