@@ -1,4 +1,7 @@
 'use strict';
+const DISTANCE_RATE = 111.12; 
+const POST_PER_REQ = 20;
+const RadiusKM = 1
 
 
 var mongoose = require('mongoose'),
@@ -16,6 +19,19 @@ var list_all_posts = function (req, res) {
     });
 };
 exports.list_all_posts = list_all_posts;
+
+var list_lazy = function (req, res) {
+    let radius = radiusKM/DISTANCE_RATE
+    let center = req.body.location
+    let post_itr = req.body.itr
+
+    post.find({"loc":{"$geoWithin":{"$center":[center, radius]}}}, function (err, post)).skip(post_itr).limit(POST_PER_REQ) {
+        if (err)
+            res.send(err);
+        res.json(post);
+    });
+};
+exports.list_lazy = list_lazy;
 
 
 var create_a_post = function (req, res) {
