@@ -3,6 +3,25 @@ const DISTANCE_RATE = 111.12;
 const POST_PER_REQ = 20;
 const radiusKM = 1000;
 
+var check_token = function (req, res, callback) {
+    console.log("CHECKING TOKEN");
+    console.log(req.query.token);
+    User.findOne({'token': req.query.token}, function (err, person) {
+        if (err) {
+            res.send(err);
+            callback(undefined);
+        }
+        if (person === null) {
+            console.log("creating new user");
+            create_a_user(req, res, callback);
+        } else {
+            console.log(person);
+            console.log("submitted user");
+            callback(person);
+        }
+    })
+};
+module.exports.check_token = check_token;
 
 var mongoose = require('mongoose'),
     Post = mongoose.model('Posts'),
@@ -11,6 +30,7 @@ var mongoose = require('mongoose'),
 var assert = require('assert');
 
 ///
+
 var list_all_posts = function (req, res) {
     Post.find({}, function (err, post) {
         if (err)
@@ -21,25 +41,34 @@ var list_all_posts = function (req, res) {
 exports.list_all_posts = list_all_posts;
 
 var list_lazy = function (req, res) {
-    //console.log(req);
-    //console.log(req.query);
-    //console.log(req.body);
-    if(req.query.latitude !== undefined && req.query.latitude !== undefined ) {
-        console.log("Someone has requested to see posts " + req.query.latitude + " " + req.query.longitude);
-        let radius = radiusKM / DISTANCE_RATE;
-        let center = [req.query.latitude, req.query.longitude];
-        let post_itr = req.query.itr;
 
-        // var q = post.find({"loc":{"$geoWithin":{"$center":[center, radius]}}}.skip(0).limit(POST_PER_REQ))
-        Post.find({"location": {"$geoWithin": {"$center": [center, radius]}}}, function (err, post) {
-            if (err) return handleError(err);
-            console.log(post);
-            res.send(post);
-        })
-    }else {
-        console.log("Someone has requested to see posts but has no location.")
-    }
 
+    var callback = (function (result) {
+        if(result === undefined){
+            res.send("An Error has occurred");
+        }
+        else if (req.query.latitude !== undefined && req.query.latitude !== undefined) {
+            console.log("Someone has requested to see posts " + req.query.latitude + " " + req.query.longitude);
+            let radius = radiusKM / DISTANCE_RATE;
+            let center = [req.query.latitude, req.query.longitude];
+            let post_itr = req.query.itr;
+
+            // var q = post.find({"loc":{"$geoWithin":{"$center":[center, radius]}}}.skip(0).limit(POST_PER_REQ))
+            Post.find({
+                "location":
+                    {"$geoWithin": {"$center": [center, radius]}}
+            }, function (err, post) {
+                if (err) return handleError(err);
+                console.log(post);
+                res.send(post);
+            })
+        } else {
+            console.log("Someone has requested to see posts but has no location.")
+        }
+
+    });
+
+    check_token(req, res, callback);
 };
 exports.list_lazy = list_lazy;
 
@@ -156,11 +185,12 @@ exports.delete_a_post = function (req, res) {
     });
 };
 
-var create_a_user = function (req, res) {
-    var token = req.params.token;
+var create_a_user = function (req, res, callback) {
+    var token = req.query.token;
     User.findOne().sort({id: -1}).exec(function (err, person) {
         if (err) {
             res.send(err)
+            return undefined;
         }
         else {
             var id = 1;
@@ -171,15 +201,15 @@ var create_a_user = function (req, res) {
             }
 
             var new_user = new User({
-                token: req.params.token,
+                token: req.query.token,
                 id: id
             });
 
             new_user.save(function (err, user) {
                 if (err) {
-                    res.send(err);
+                    callback(undefined);
                 } else {
-                    list_all_posts(req, res);
+                    callback(new_user);
                 }
             });
         }
@@ -188,20 +218,3 @@ var create_a_user = function (req, res) {
 
 //exports.create_a_user = create_a_user;
 
-exports.check_token = function (req, res) {
-    console.log("CHECKING TOKEN");
-    console.log(req.params.token);
-    User.findOne({'token': req.params.token}, function (err, person) {
-        if (err) {
-            res.send(err);
-        }
-        if (person === null) {
-            console.log("creating new user");
-            create_a_user(req, res)
-        } else {
-            console.log(person);
-            console.log("submitted user");
-            list_all_posts(req, res)
-        }
-    })
-};
