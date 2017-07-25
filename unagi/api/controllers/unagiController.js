@@ -18,7 +18,7 @@ var list_all_posts = function (req, res) {
 exports.list_all_posts = list_all_posts;
 
 
-exports.create_a_post = function (req, res) {
+var create_a_post = function (req, res) {
     Post.findOne().sort({id: -1}).exec(function (err, post_with_highest_id) {
         if (err) {
             res.send(err)
@@ -58,6 +58,46 @@ exports.create_a_post = function (req, res) {
         }
     });
 };
+
+var create_a_post_2 = function (req, res) {
+    Post.findOne().sort({id: -1}).exec(function (err, post_with_highest_id) {
+        if (err) {
+            res.send(err)
+        }
+        else if (req.body.Longitude === undefined || req.body.Latitude === undefined) {
+            res.send("No location has been sent");
+        } else {
+            var id = 1;
+            if (post_with_highest_id === null) {
+                //do nothing
+            } else {
+                id = post_with_highest_id.id + 1;
+            }
+            var new_post = new Post({
+                id: id,
+                text: req.body.text,
+                location: {
+                    type : "Point",
+                    coordinates :
+                        [req.body.Latitude, req.body.Longitude]
+                }
+            });
+
+            var error = new_post.validateSync();
+            new_post.save(function (err, post) {
+                if (err) {
+                    res.send(err);
+                }
+                else {
+                    res.json(post);
+                }
+            });
+            console.log("new post:" + new_post);
+        }
+    });
+};
+
+exports.create_a_post = create_a_post_2;
 
 
 exports.read_a_post = function (req, res) {

@@ -13,13 +13,9 @@ var PostSchema = new Schema({
         required: true
     },
     location: {
-        pointX: {
-            type: Number,
-            required: true
-        },
-        pointY: {
-            type: Number,
-            required: true
+        type : {type : String},
+        coordinates : {
+            type : [Number]
         }
     }
 });
