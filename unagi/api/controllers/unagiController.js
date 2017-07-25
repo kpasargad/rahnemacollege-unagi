@@ -21,9 +21,9 @@ var list_all_posts = function (req, res) {
 exports.list_all_posts = list_all_posts;
 
 var list_lazy = function (req, res) {
-    console.log(req);
-    console.log(req.query);
-    console.log(req.body);
+    //console.log(req);
+    //console.log(req.query);
+    //console.log(req.body);
     if(req.query.latitude !== undefined && req.query.latitude !== undefined ) {
         console.log("Someone has requested to see posts " + req.query.latitude + " " + req.query.longitude);
         let radius = radiusKM / DISTANCE_RATE;
@@ -33,7 +33,7 @@ var list_lazy = function (req, res) {
         // var q = post.find({"loc":{"$geoWithin":{"$center":[center, radius]}}}.skip(0).limit(POST_PER_REQ))
         Post.find({"location": {"$geoWithin": {"$center": [center, radius]}}}, function (err, post) {
             if (err) return handleError(err);
-            console.log(post); // Space Ghost is a talk show host.
+            console.log(post);
             res.send(post);
         })
     }else {
