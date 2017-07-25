@@ -21,15 +21,24 @@ var list_all_posts = function (req, res) {
 exports.list_all_posts = list_all_posts;
 
 var list_lazy = function (req, res) {
-    let radius = radiusKM / DISTANCE_RATE;
-    let center = [req.query.latitude, req.query.longitude];
-    let post_itr = req.query.itr;
+    console.log(req);
+    console.log(req.query);
+    console.log(req.body);
+    if(req.query.latitude !== undefined && req.query.latitude !== undefined ) {
+        console.log("Someone has requested to see posts " + req.query.latitude + " " + req.query.longitude);
+        let radius = radiusKM / DISTANCE_RATE;
+        let center = [req.query.latitude, req.query.longitude];
+        let post_itr = req.query.itr;
 
-    // var q = post.find({"loc":{"$geoWithin":{"$center":[center, radius]}}}.skip(0).limit(POST_PER_REQ))
-    Post.find({"location":{"$geoWithin":{"$center":[center, radius]}}}, function(err, post){
-        if (err) return handleError(err);
-        console.log(post) // Space Ghost is a talk show host.
-    })
+        // var q = post.find({"loc":{"$geoWithin":{"$center":[center, radius]}}}.skip(0).limit(POST_PER_REQ))
+        Post.find({"location": {"$geoWithin": {"$center": [center, radius]}}}, function (err, post) {
+            if (err) return handleError(err);
+            console.log(post); // Space Ghost is a talk show host.
+            res.send(post);
+        })
+    }else {
+        console.log("Someone has requested to see posts but has no location.")
+    }
 
 };
 exports.list_lazy = list_lazy;
