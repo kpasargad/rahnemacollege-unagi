@@ -1,4 +1,5 @@
 'use strict';
+
 const DISTANCE_RATE = 111.12;
 const POST_PER_REQ = 20;
 const radiusKM = 1000;
