@@ -5,7 +5,7 @@ module.exports = function (app) {
 
     // unagi Routes
     app.route('/posts')
-        .get(unagi.list_all_posts)
+        .get(unagi.list_lazy)
         .post(unagi.create_a_post);
 
     // app.route('/users')

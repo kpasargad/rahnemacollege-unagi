@@ -1,7 +1,7 @@
 'use strict';
-const DISTANCE_RATE = 111.12; 
+const DISTANCE_RATE = 111.12;
 const POST_PER_REQ = 20;
-const RadiusKM = 1
+const radiusKM = 1000;
 
 
 var mongoose = require('mongoose'),
@@ -21,15 +21,16 @@ var list_all_posts = function (req, res) {
 exports.list_all_posts = list_all_posts;
 
 var list_lazy = function (req, res) {
-    let radius = radiusKM/DISTANCE_RATE
-    let center = req.body.location
-    let post_itr = req.body.itr
+    let radius = radiusKM / DISTANCE_RATE;
+    let center = [req.query.latitude, req.query.longitude];
+    let post_itr = req.query.itr;
 
-    post.find({"loc":{"$geoWithin":{"$center":[center, radius]}}}, function (err, post)).skip(post_itr).limit(POST_PER_REQ) {
-        if (err)
-            res.send(err);
-        res.json(post);
-    });
+    // var q = post.find({"loc":{"$geoWithin":{"$center":[center, radius]}}}.skip(0).limit(POST_PER_REQ))
+    Post.find({"location":{"$geoWithin":{"$center":[center, radius]}}}, function(err, post){
+        if (err) return handleError(err);
+        console.log(post) // Space Ghost is a talk show host.
+    })
+
 };
 exports.list_lazy = list_lazy;
 
@@ -93,8 +94,8 @@ var create_a_post_2 = function (req, res) {
                 id: id,
                 text: req.body.text,
                 location: {
-                    type : "Point",
-                    coordinates :
+                    type: "Point",
+                    coordinates:
                         [req.body.Latitude, req.body.Longitude]
                 }
             });
@@ -168,7 +169,7 @@ var create_a_user = function (req, res) {
             new_user.save(function (err, user) {
                 if (err) {
                     res.send(err);
-                }else{
+                } else {
                     list_all_posts(req, res);
                 }
             });
