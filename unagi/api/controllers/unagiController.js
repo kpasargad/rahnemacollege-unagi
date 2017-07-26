@@ -45,8 +45,8 @@ var list_lazy = function (req, res) {
 
 
     var callback = (function (result) {
-        if(result === undefined){
-            res.send("An Error has occurred");
+        if (result === undefined) {
+            res.send("User error has occurred");
         }
         else if (req.query.latitude !== undefined && req.query.latitude !== undefined) {
             console.log("Someone has requested to see posts " + req.query.latitude + " " + req.query.longitude);
@@ -74,7 +74,7 @@ var list_lazy = function (req, res) {
 exports.list_lazy = list_lazy;
 
 
-var create_a_post = function (req, res) {
+var create_a_post_old = function (req, res) {
     Post.findOne().sort({id: -1}).exec(function (err, post_with_highest_id) {
         if (err) {
             res.send(err)
@@ -115,45 +115,57 @@ var create_a_post = function (req, res) {
     });
 };
 
-var create_a_post_2 = function (req, res) {
-    Post.findOne().sort({id: -1}).exec(function (err, post_with_highest_id) {
-        if (err) {
-            res.send(err)
+var create_a_post = function (req, res) {
+    console.log(req.query.token);
+    var callback = function (result) {
+        if (result === undefined) {
+            res.send("User error has occurred");
         }
-        else if (req.body.Longitude === undefined || req.body.Latitude === undefined) {
-            res.send("No location has been sent");
-        } else {
-            var id = 1;
-            if (post_with_highest_id === null) {
-                //do nothing
-            } else {
-                id = post_with_highest_id.id + 1;
-            }
-            var new_post = new Post({
-                id: id,
-                text: req.body.text,
-                location: {
-                    type: "Point",
-                    coordinates:
-                        [req.body.Latitude, req.body.Longitude]
-                }
-            });
-
-            var error = new_post.validateSync();
-            new_post.save(function (err, post) {
+        else {
+            Post.findOne().sort({id: -1}).exec(function (err, post_with_highest_id) {
                 if (err) {
-                    res.send(err);
+                    res.send(err)
                 }
-                else {
-                    res.json(post);
+                else if (req.body.Longitude === undefined || req.body.Latitude === undefined) {
+                    res.send("No location has been sent");
+                } else if (req.body.text === undefined) {
+                    res.send("No text has been sent")
+                } else if (req.body.text.length > 160) {
+                    res.send("Illegal number of characters, more than 160 characters has been sent")
+                } else {
+                    var id = 1;
+                    if (post_with_highest_id === null) {
+                        //do nothing
+                    } else {
+                        id = post_with_highest_id.id + 1;
+                    }
+                    var new_post = new Post({
+                        id: id,
+                        text: req.body.text,
+                        location: {
+                            type: "Point",
+                            coordinates:
+                                [req.body.Latitude, req.body.Longitude]
+                        }
+                    });
+                    new_post.save(function (err, post) {
+                        if (err) {
+                            res.send(err);
+                        }
+                        else {
+                            res.json(post);
+                        }
+                    });
+                    console.log("new post:" + new_post);
                 }
             });
-            console.log("new post:" + new_post);
         }
-    });
+    };
+
+    check_token(req, res, callback);
 };
 
-exports.create_a_post = create_a_post_2;
+exports.create_a_post = create_a_post;
 
 
 exports.read_a_post = function (req, res) {
