@@ -3,7 +3,10 @@
 const DISTANCE_RATE = 111.12;
 const POST_PER_REQ = 20;
 const radiusKM = 1000;
-
+const USER_ERROR = "User error has occurred";
+/*returns a new user or the associated existing user.
+* returns undefined in case of error
+* */
 var check_token = function (req, res, callback) {
     console.log("CHECKING TOKEN");
     console.log(req.query.token);
@@ -42,11 +45,9 @@ var list_all_posts = function (req, res) {
 exports.list_all_posts = list_all_posts;
 
 var list_lazy = function (req, res) {
-
-
     var callback = (function (result) {
         if (result === undefined) {
-            res.send("User error has occurred");
+            res.send(USER_ERROR);
         }
         else if (req.query.latitude !== undefined && req.query.latitude !== undefined) {
             console.log("Someone has requested to see posts " + req.query.latitude + " " + req.query.longitude);
@@ -68,12 +69,13 @@ var list_lazy = function (req, res) {
         }
 
     });
-
     check_token(req, res, callback);
 };
 exports.list_lazy = list_lazy;
 
-
+/**
+ * Deprecated
+ */
 var create_a_post_old = function (req, res) {
     Post.findOne().sort({id: -1}).exec(function (err, post_with_highest_id) {
         if (err) {
@@ -116,10 +118,9 @@ var create_a_post_old = function (req, res) {
 };
 
 var create_a_post = function (req, res) {
-    console.log(req.query.token);
-    var callback = function (result) {
-        if (result === undefined) {
-            res.send("User error has occurred");
+    var callback = function (person) {
+        if (person === undefined) {
+            res.send(USER_ERROR);
         }
         else {
             Post.findOne().sort({id: -1}).exec(function (err, post_with_highest_id) {
@@ -146,7 +147,8 @@ var create_a_post = function (req, res) {
                             type: "Point",
                             coordinates:
                                 [req.body.Latitude, req.body.Longitude]
-                        }
+                        },
+                        author_id : person.id
                     });
                     new_post.save(function (err, post) {
                         if (err) {
@@ -167,30 +169,44 @@ var create_a_post = function (req, res) {
 
 exports.create_a_post = create_a_post;
 
-
 exports.read_a_post = function (req, res) {
-    Post.findById(req.params.postId, function (err, post) {
-        if (err)
-            res.send(err);
-        res.json(post);
-    });
+    var callback = function (person) {
+        if (person !== undefined) {
+        Post.findById(req.query.postId, function (err, post) {
+            if (err) {
+                res.send(err);
+            } else {
+                res.json(post);
+            }
+        });
+        }else {
+            res.send(USER_ERROR)
+        }
+    };
+
+    check_token(req, res, callback);
 };
 
-
+//NOT-USED
 exports.update_a_post = function (req, res) {
-    Post.findOneAndUpdate({_id: req.params.postId}, req.body, {new: true}, function (err, post) {
-        if (err)
-            res.send(err);
-        res.json(post);
-    });
+    var callback = function (person) {
+        if (person !== undefined) {
+            Post.findOneAndUpdate({_id: req.query.postId}, req.body, {new: true}, function (err, post) {
+                if (err)
+                    res.send(err);
+                res.json(post);
+            });
+        }else {
+            res.send(USER_ERROR)
+        }
+    };
+    check_token(req, res, callback);
 };
 
 
 exports.delete_a_post = function (req, res) {
-
-
     Post.remove({
-        _id: req.params.postId
+        _id: req.query.postId
     }, function (err, post) {
         if (err)
             res.send(err);
