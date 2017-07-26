@@ -78,50 +78,6 @@ var list_lazy = function (req, res) {
 };
 exports.list_lazy = list_lazy;
 
-/**
- * Deprecated
- */
-var create_a_post_old = function (req, res) {
-    Post.findOne().sort({id: -1}).exec(function (err, post_with_highest_id) {
-        if (err) {
-            res.send(err)
-        }
-        else if (req.body.location === undefined) {
-            res.send("No location has been sent");
-        } else {
-            var id = 1;
-            if (post_with_highest_id === null) {
-                //do nothing
-            } else {
-                id = post_with_highest_id.id + 1;
-            }
-            var new_post = new Post({
-                id: id,
-                text: req.body.text,
-                location: req.body.location
-            });
-
-            var error = new_post.validateSync();
-            //console.log(error);
-            //if (error === undefined) {
-            new_post.save(function (err, post) {
-                if (err) {
-                    res.send(err);
-                }
-                else {
-                    res.json(post);
-                }
-            });
-            console.log("new post:" + new_post);
-            // }
-            //  else {
-            //      console.log("new post is not valid.");
-            //      res.send(error.errors);
-            //  }
-        }
-    });
-};
-
 var create_a_post = function (req, res) {
     var callback = function (person) {
         if (person === undefined) {
@@ -160,15 +116,17 @@ var create_a_post = function (req, res) {
                         },
                         author_id : person.id
                     });
+                    console.log("new post:" + new_post);
                     new_post.save(function (err, post) {
                         if (err) {
+                            console.log("error in saving the post.");
                             res.send(err);
                         }
                         else {
+                            console.log("post is saved.");
                             res.json(post);
                         }
                     });
-                    console.log("new post:" + new_post);
                 }
             });
         }
