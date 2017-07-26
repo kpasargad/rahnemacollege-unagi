@@ -4,6 +4,11 @@ const DISTANCE_RATE = 111.12;
 const POST_PER_REQ = 20;
 const radiusKM = 1000;
 const USER_ERROR = "User error has occurred";
+const LOC_ERROR = "No location has been sent.";
+const TEXT_ERROR = "No text has been sent";
+const NUMBER_OF_CHARACTERS_ERROR = "Illegal number of characters, more than 160 characters has been sent";
+const CHARACTERS_BOUND = 160;
+
 /*returns a new user or the associated existing user.
 * returns undefined in case of error
 * */
@@ -120,19 +125,24 @@ var create_a_post_old = function (req, res) {
 var create_a_post = function (req, res) {
     var callback = function (person) {
         if (person === undefined) {
+            console.log(USER_ERROR);
             res.send(USER_ERROR);
         }
         else {
+
             Post.findOne().sort({id: -1}).exec(function (err, post_with_highest_id) {
                 if (err) {
                     res.send(err)
                 }
                 else if (req.body.Longitude === undefined || req.body.Latitude === undefined) {
-                    res.send("No location has been sent");
+                    console.log(LOC_ERROR);
+                    res.send(LOC_ERROR);
                 } else if (req.body.text === undefined) {
-                    res.send("No text has been sent")
-                } else if (req.body.text.length > 160) {
-                    res.send("Illegal number of characters, more than 160 characters has been sent")
+                    console.log(TEXT_ERROR);
+                    res.send(TEXT_ERROR);
+                } else if (req.body.text.length > CHARACTERS_BOUND) {
+                    console.log(NUMBER_OF_CHARACTERS_ERROR);
+                    res.send(NUMBER_OF_CHARACTERS_ERROR);
                 } else {
                     var id = 1;
                     if (post_with_highest_id === null) {
