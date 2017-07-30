@@ -18,6 +18,7 @@ var mongoose = require('mongoose'),
     Post = mongoose.model('Posts'),
     User = mongoose.model('Users'),
     Like = mongoose.model('Likes');
+var send = require('./unagiSendPost').send;
 
 /**
  * returns a new user or the associated existing user.
@@ -73,7 +74,7 @@ var create_a_user = function (req, res, callback) {
     });
 };
 
-var list_all_posts = function (req, res) g{
+var list_all_posts = function (req, res) {
     Post.find({}, function (err, post) {
         if (err)
             res.send(err);
@@ -84,8 +85,8 @@ exports.list_all_posts = list_all_posts;
 
 
 var list_lazy = function (req, res) {
-    var callback = (function (result) {
-        if (result === undefined) {
+    var callback = (function (person) {
+        if (person === undefined) {
             res.send({
                 pop_up_error: USER_ERROR
             });
@@ -103,7 +104,7 @@ var list_lazy = function (req, res) {
             }, function (err, post) {
                 if (err) return handleError(err);
                 console.log(post);
-                res.send(post);
+                send(req, res, post, person);
             })
         } else {
             console.log("Someone has requested to see posts but has no location.")
@@ -294,7 +295,7 @@ exports.unlike_a_post = function (req, res) {
                 pop_up_error: USER_ERROR
             });
         } else {
-            var removalCallBack = function() {
+            var removalCallBack = function () {
                 Like.remove({
                     postId: postId,
                     userId: person.id
@@ -312,16 +313,16 @@ exports.unlike_a_post = function (req, res) {
                 postId: postId,
                 userId: person.id
             }, function (err, like) {
-                if(err){
+                if (err) {
                     res.send({
                         pop_up_error: UNLIKE_ERROR
                     })
-                }else {
-                    if(like === null){
+                } else {
+                    if (like === null) {
                         res.send({
                             pop_up_error: NOT_LIKED_UNLIKE_ERROR
                         })
-                    }else {
+                    } else {
                         removalCallBack();
                     }
                 }
