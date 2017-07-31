@@ -1,4 +1,5 @@
 'use strict';
+
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
@@ -21,6 +22,10 @@ var PostSchema = new Schema({
     author_id : {
         type : Number,
         required : true
+    },
+    timestamp: {
+        type : Number,
+        default: Date.now
     }
 });
 
@@ -35,19 +40,7 @@ var UserSchema = new Schema({
     }
 });
 
-var UsersPostsLikesSchema = new Schema({
-    postId : {
-        type : Number,
-        required : true
-    },
-    userId : {
-        type : Number,
-        required : true
-    }
-});
-
 module.exports = {
     posts: mongoose.model('Posts', PostSchema),
-    users: mongoose.model('Users', UserSchema),
-    likes: mongoose.model('Likes', UsersPostsLikesSchema)
+    users: mongoose.model('Users', UserSchema)
 };
