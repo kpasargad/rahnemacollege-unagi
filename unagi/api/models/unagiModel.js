@@ -28,6 +28,7 @@ var PostSchema = new Schema({
         default: Date.now
     }
 });
+PostSchema.index({"timestamp":-1, "location":1});
 
 var UserSchema = new Schema({
     id: {

@@ -1,7 +1,7 @@
 'use strict';
 
 const DISTANCE_RATE = 111.12;
-const POST_PER_REQ = 20;
+const POST_PER_REQ = 9;
 const radiusKM = 1000;
 const USER_ERROR = "User error has occurred";
 const LOC_ERROR = "No location has been sent.";
@@ -62,9 +62,9 @@ var list_lazy = function (req, res) {
             let lastPost = req.query.lastpost;
             // var q = post.find({"loc":{"$geoWithin":{"$center":[center, radius]}}}.skip(0).limit(POST_PER_REQ))
             Post.find({
+                "timestamp": {$lt:lastPost},
                 "location":
-                    {"$geoWithin": {"$center": [center, radius]}},
-                "timestamp": {$lt:lastPost}
+                    {"$geoWithin": {"$center": [center, radius]}}
             }, function (err, post) {
                 if (err) {
                     console.log("Request is invalid");
