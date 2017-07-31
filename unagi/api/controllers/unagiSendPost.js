@@ -1,8 +1,8 @@
 'use strict';
 var mongoose = require('mongoose'),
-    Post = mongoose.model('Posts'),
-    User = mongoose.model('Users'),
-    Like = mongoose.model('Likes');
+    PostModel = mongoose.model('Posts'),
+    UserModel = mongoose.model('Users'),
+    LikeModel = mongoose.model('Likes');
 
 /**
  * This function handles to-be-sent posts.
@@ -13,14 +13,15 @@ var mongoose = require('mongoose'),
  * @param user
  */
 var sendPosts = function (req, res, posts, user) {
-    Like.find({
+    //console.log("RAW POSTS:" + posts);
+    LikeModel.find({
         userId: user.id
-    }, function (err, LikedPosts) {
+    }, function (err, likedPosts) {
         if (err) {
             res.send(err);
         }
         else {
-            var ids = [...new Set(LikedPosts.map(function (item) {
+            var ids = [...new Set(likedPosts.map(function (item) {
                 if (item !== undefined) {
                     return item.postId
                 } else {
@@ -28,19 +29,40 @@ var sendPosts = function (req, res, posts, user) {
                 }
             }))];
             var sendingPosts = [];
-            for(var i = 0; i < posts.length; i++){
+            var length = posts.length;
+            console.log("length: " + length);
+            var donePosts = 0;
+            for (var i = 0; i < length; i++) {
                 var post = posts[i];
-                sendingPosts[i] = {
-                    id: post.id,
-                    text: post.text,
-                    author_id: post.author_id,
-                    location: post.location,
-                    is_liked : (ids.indexOf(post.id) > -1)
+                var postHandler = function (post) {
+                    LikeModel.find({
+                        postId: post.id
+                    }, function (err, likeQueriesOfThisPost) {
+                        console.log(likeQueriesOfThisPost);
+                        var number_of_likes = likeQueriesOfThisPost.length;
+                        console.log("Likes :" + number_of_likes);
+
+                        sendingPosts[donePosts] = ({
+                            id: post.id,
+                            text: post.text,
+                            author_id: post.author_id,
+                            location: post.location,
+                            is_liked: (ids.indexOf(post.id) > -1),
+                            number_of_likes : number_of_likes
+                        });
+                        donePosts++;
+                        console.log("DONE POSTS:" + donePosts + " " + sendingPosts);
+                        if (donePosts === length) {
+                            console.log("SENDING POSTS...");
+                            console.log(sendingPosts);
+                            res.send(sendingPosts);
+                        }else {
+                            console.log(length);
+                            console.log(i + "  " + (length));
+                        }
+                    });
                 };
-                if(i === posts.length - 1){
-                    console.log(sendingPosts);
-                    res.send(sendingPosts);
-                }
+                postHandler(post);
             }
         }
     })

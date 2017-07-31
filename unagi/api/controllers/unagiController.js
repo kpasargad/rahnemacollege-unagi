@@ -103,7 +103,6 @@ var list_lazy = function (req, res) {
                     {"$geoWithin": {"$center": [center, radius]}}
             }, function (err, post) {
                 if (err) return handleError(err);
-                console.log(post);
                 send(req, res, post, person);
             })
         } else {
