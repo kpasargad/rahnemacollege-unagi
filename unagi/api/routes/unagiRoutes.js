@@ -18,11 +18,4 @@ module.exports = function (app) {
 
     app.route('/users/:token')
         .get(unagi.check_token);
-
-    app.route('/posts/:postId/like')
-        .get(unagi.like_a_post);
-
-    app.route('/posts/:postId/unlike')
-        .get(unagi.unlike_a_post);
-
 };
