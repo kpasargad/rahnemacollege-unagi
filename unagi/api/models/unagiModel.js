@@ -55,4 +55,5 @@ var UsersPostsLikesSchema = new Schema({
 module.exports = {
     posts: mongoose.model('Posts', PostSchema),
     users: mongoose.model('Users', UserSchema),
+    likes: mongoose.model('Likes', UsersPostsLikesSchema)
 };

@@ -8,9 +8,6 @@ module.exports = function (app) {
         .get(unagi.list_lazy)
         .post(unagi.create_a_post);
 
-    // app.route('/users')
-    //     .post(unagi.check_token);
-
     app.route('/posts/:postId')
         .get(unagi.read_a_post)
         .put(unagi.update_a_post)

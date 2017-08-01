@@ -17,60 +17,11 @@ var mongoose = require('mongoose'),
     Post = mongoose.model('Posts'),
     User = mongoose.model('Users'),
     Like = mongoose.model('Likes');
-var send = require('./unagiSendPost').send;
+var send = require('./sendPost').send;
 
+var check_token = require('./tokenCheck').check_token;
+exports.check_token = check_token;
 
-/*returns a new user or the associated existing user.
-* returns undefined in case of error
-* */
-var check_token = function (req, res, callback) {
-    console.log("CHECKING TOKEN");
-    console.log(req.query.token);
-    User.findOne({'token': req.query.token}, function (err, person) {
-        if (err) {
-            res.send(err);
-            callback(undefined);
-        }
-        if (person === null) {
-            console.log("creating new user");
-            create_a_user(req, res, callback);
-        } else {
-            console.log(person);
-            console.log("submitted user");
-            callback(person);
-        }
-    })
-};
-module.exports.check_token = check_token;
-
-var create_a_user = function (req, res, callback) {
-    var token = req.query.token;
-    User.findOne().sort({id: -1}).exec(function (err, person) {
-        if (err) {
-            res.send(err);
-            return undefined;
-        }
-        else {
-            var id = 1;
-            if (person === null) {
-                //do nothing
-            } else {
-                id = person.id + 1;
-            }
-            var new_user = new User({
-                token: req.query.token,
-                id: id
-            });
-            new_user.save(function (err, user) {
-                if (err) {
-                    callback(undefined);
-                } else {
-                    callback(new_user);
-                }
-            });
-        }
-    });
-};
 
 var list_all_posts = function (req, res) {
     Post.find({}, function (err, post) {
@@ -283,7 +234,7 @@ exports.like_a_post = function (req, res) {
 };
 
 /**
- * This function handles the ulike request.
+ * This function handles the unlike request.
  * @param req
  * @param res
  */
@@ -333,3 +284,4 @@ exports.unlike_a_post = function (req, res) {
     };
     check_token(req, res, callback);
 };
+
