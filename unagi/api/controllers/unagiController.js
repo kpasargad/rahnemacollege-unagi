@@ -125,7 +125,8 @@ var create_a_post = function (req, res) {
                             coordinates:
                                 [req.body.Latitude, req.body.Longitude]
                         },
-                        author_id: person.id
+                        author_id: person.id,
+                        timestamp: Date.now()
                     });
                     console.log("new post:" + new_post);
                     new_post.save(function (err, post) {
