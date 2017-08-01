@@ -126,7 +126,11 @@ var create_a_post = function (req, res) {
                                 [req.body.Latitude, req.body.Longitude]
                         },
                         author_id: person.id,
+<<<<<<< HEAD
                         timestamp:Date.now()
+=======
+                        timestamp: Date.now()
+>>>>>>> 645c10f758ab95cea8cca09b1861ff532fee41d7
                     });
                     console.log("new post:" + new_post);
                     new_post.save(function (err, post) {
