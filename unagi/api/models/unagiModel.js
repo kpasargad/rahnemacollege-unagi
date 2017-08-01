@@ -30,6 +30,9 @@ var PostSchema = new Schema({
     number_of_likes: {
         type: Number,
         default: 0
+    },
+    hotness:{
+        type : Number
     }
 });
 PostSchema.index({"timestamp": -1, "location": 1});

@@ -1,7 +1,12 @@
 'use strict';
 
+var mongoose = require('mongoose'),
+    PostModel = mongoose.model('Posts'),
+    UserModel = mongoose.model('Users'),
+    LikeModel = mongoose.model('Likes');
+
 var create_a_user = function (req, res, callback) {
-    User.findOne().sort({id: -1}).exec(function (err, person) {
+    UserModel.findOne().sort({id: -1}).exec(function (err, person) {
         if (err) {
             res.send(err);
             return undefined;
@@ -13,7 +18,7 @@ var create_a_user = function (req, res, callback) {
             } else {
                 id = person.id + 1;
             }
-            var new_user = new User({
+            var new_user = new UserModel({
                 token: req.query.token,
                 id: id
             });
@@ -34,7 +39,7 @@ var create_a_user = function (req, res, callback) {
 var check_token = function (req, res, callback) {
     console.log("CHECKING TOKEN");
     console.log(req.query.token);
-    User.findOne({'token': req.query.token}, function (err, person) {
+    UserModel.findOne({'token': req.query.token}, function (err, person) {
         if (err) {
             res.send(err);
             callback(undefined);

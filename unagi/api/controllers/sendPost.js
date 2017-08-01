@@ -30,31 +30,35 @@ var sendPosts = function (req, res, posts, user) {
             }))];
             var sendingPosts = [];
             var length = posts.length;
-            console.log("length: " + length);
-            var donePosts = 0;
-            for (var i = 0; i < length; i++) {
-                var post = posts[i];
-                var postHandler = function (post) {
-                    sendingPosts[donePosts] = ({
-                        id: post.id,
-                        text: post.text,
-                        author_id: post.author_id,
-                        location: post.location,
-                        is_liked: (ids.indexOf(post.id) > -1),
-                        number_of_likes: post.number_of_likes
-                    });
-                    donePosts++;
-                    console.log("DONE POSTS:" + donePosts + " " + sendingPosts);
-                    if (donePosts === length) {
-                        console.log("SENDING POSTS...");
-                        console.log(sendingPosts);
-                        res.send(sendingPosts);
-                    } else {
-                        console.log(length);
-                        console.log(i + "  " + (length));
-                    }
-                };
-                postHandler(post);
+            if (length === 0) {
+                res.send([]);
+            } else {
+                console.log("length: " + length);
+                var donePosts = 0;
+                for (var i = 0; i < length; i++) {
+                    var post = posts[i];
+                    var postHandler = function (post) {
+                        sendingPosts[donePosts] = ({
+                            id: post.id,
+                            text: post.text,
+                            author_id: post.author_id,
+                            location: post.location,
+                            is_liked: (ids.indexOf(post.id) > -1),
+                            number_of_likes: post.number_of_likes
+                        });
+                        donePosts++;
+                        console.log("DONE POSTS:" + donePosts + " " + sendingPosts);
+                        if (donePosts === length) {
+                            console.log("SENDING POSTS...");
+                            console.log(sendingPosts);
+                            res.send(sendingPosts);
+                        } else {
+                            console.log(length);
+                            console.log(i + "  " + (length));
+                        }
+                    };
+                    postHandler(post);
+                }
             }
         }
     })
