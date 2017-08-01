@@ -22,7 +22,7 @@ const radius = require('./consts/geoConsts').radius;
 const lazyReqValidator = require("./validators/lazyReqValidator").lazyReqValidator;
 
 //Other:
-var hotness = require('./hotController').h
+var hotness = require('./hotController').hotness;
 var mongoose = require('mongoose'),
     Post = mongoose.model('Posts'),
     User = mongoose.model('Users'),
@@ -125,7 +125,8 @@ var create_a_post = function (req, res) {
                             coordinates:
                                 [req.body.Latitude, req.body.Longitude]
                         },
-                        author_id: person.id
+                        author_id: person.id,
+                        timestamp:Date.now()
                     });
                     console.log("new post:" + new_post);
                     new_post.save(function (err, post) {
