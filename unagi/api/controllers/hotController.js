@@ -1,13 +1,14 @@
 'use strict';
 
 var checkToken = require('./tokenCheck').check_token;
-Post = mongoose.model('Posts');
+var Post = mongoose.model('Posts');
 
 var hotness = function (likes, date) {
     var order = log(max(likes, 1), 10);
     var seconds = date - 1134028003;
     return round(order + seconds / 45000, 7);
 };
+exports.hotness = hotness;
 
 exports.list_hot_posts = function (req, res) {
     var callback = function (person) {
@@ -20,9 +21,9 @@ exports.list_hot_posts = function (req, res) {
                 if (err) {
                     res.send(err);
                 } else {
-                    hotness(post.number_of_likes, post.timestamp) = hotness
+                    //TODO
                 }
             });
-    }
+    };
     checkToken(req, res, callback);
-}
+};

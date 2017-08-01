@@ -21,6 +21,8 @@ const radius = require('./consts/geoConsts').radius;
 //Validators:
 const lazyReqValidator = require("./validators/lazyReqValidator").lazyReqValidator;
 
+//Other:
+var hotness = require('./hotController').h
 var mongoose = require('mongoose'),
     Post = mongoose.model('Posts'),
     User = mongoose.model('Users'),
@@ -231,6 +233,7 @@ exports.like_a_post = function (req, res) {
                                 })
                             } else {
                                 post.number_of_likes++;
+                                post.hotness = hotness(post.number_of_likes, post.timestamp);
                                 res.send(like);
                             }
                         });
@@ -289,6 +292,7 @@ exports.unlike_a_post = function (req, res) {
                                 })
                             } else {
                                 post.number_of_likes--;
+                                post.hotness = hotness(post.number_of_likes, post.timestamp);
                                 res.send("removed like" + like);
                             }
                         });
