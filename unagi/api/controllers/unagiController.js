@@ -46,8 +46,7 @@ var list_lazy = function (req, res) {
     var callback = (function (person) {
         if (person === undefined) {
             res.send(USER_ERROR);
-        }
-        else {
+        } else {
             var afterValidationCB = function (req, res, person) {
                 console.log(person);
                 console.log("Someone has requested to see posts " + req.query.latitude + " " + req.query.longitude);
@@ -55,9 +54,14 @@ var list_lazy = function (req, res) {
                 let lastPost = req.query.lastpost;
                 // var q = post.find({"loc":{"$geoWithin":{"$center":[center, radius]}}}.skip(0).limit(POST_PER_REQ))
                 Post.find({
-                    "timestamp": {$lt: lastPost},
-                    "location":
-                        {"$geoWithin": {"$center": [center, radius]}}
+                    "timestamp": {
+                        $lt: lastPost
+                    },
+                    "location": {
+                        "$geoWithin": {
+                            "$center": [center, radius]
+                        }
+                    }
                 }, function (err, post) {
                     if (err) {
                         console.log("Request is invalid", lastPost);
@@ -87,13 +91,13 @@ var create_a_post = function (req, res) {
             res.send({
                 pop_up_error: USER_ERROR
             });
-        }
-        else {
-            Post.findOne().sort({id: -1}).exec(function (err, post_with_highest_id) {
+        } else {
+            Post.findOne().sort({
+                id: -1
+            }).exec(function (err, post_with_highest_id) {
                 if (err) {
                     res.send(err)
-                }
-                else if (req.body.Longitude === undefined || req.body.Latitude === undefined) {
+                } else if (req.body.Longitude === undefined || req.body.Latitude === undefined) {
                     console.log({
                         pop_up_error: LOC_NOT_FOUND_ERROR
                     });
@@ -122,23 +126,17 @@ var create_a_post = function (req, res) {
                         text: req.body.text,
                         location: {
                             type: "Point",
-                            coordinates:
-                                [req.body.Latitude, req.body.Longitude]
+                            coordinates: [req.body.Latitude, req.body.Longitude]
                         },
                         author_id: person.id,
-<<<<<<< HEAD
-                        timestamp:Date.now()
-=======
                         timestamp: Date.now()
->>>>>>> 645c10f758ab95cea8cca09b1861ff532fee41d7
                     });
                     console.log("new post:" + new_post);
                     new_post.save(function (err, post) {
                         if (err) {
                             console.log("error in saving the post.");
                             res.send(err);
-                        }
-                        else {
+                        } else {
                             console.log("post is saved.");
                             res.json(post);
                         }
@@ -176,7 +174,11 @@ exports.read_a_post = function (req, res) {
 exports.update_a_post = function (req, res) {
     var callback = function (person) {
         if (person !== undefined) {
-            Post.findOneAndUpdate({_id: req.query.postId}, req.body, {new: true}, function (err, post) {
+            Post.findOneAndUpdate({
+                _id: req.query.postId
+            }, req.body, {
+                new: true
+            }, function (err, post) {
                 if (err)
                     res.send(err);
                 res.json(post);
@@ -196,7 +198,9 @@ exports.delete_a_post = function (req, res) {
     }, function (err, post) {
         if (err)
             res.send(err);
-        res.json({message: 'Post successfully deleted'});
+        res.json({
+            message: 'Post successfully deleted'
+        });
     });
 };
 
@@ -245,7 +249,10 @@ exports.like_a_post = function (req, res) {
                     }
                 });
             };
-            Like.findOne({'postId': postId, 'userId': person.id}, function (err, like) {
+            Like.findOne({
+                'postId': postId,
+                'userId': person.id
+            }, function (err, like) {
                 if (err) {
                     res.send(err);
                 } else if (like === null) {
@@ -326,4 +333,3 @@ exports.unlike_a_post = function (req, res) {
     };
     check_token(req, res, callback);
 };
-
