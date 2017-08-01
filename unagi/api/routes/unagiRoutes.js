@@ -14,10 +14,12 @@ module.exports = function (app) {
         .put(unagi.update_a_post)
         .delete(unagi.delete_a_post);
 
-    app.route('/users/:token')
-        .get(unagi.check_token);
-    
     app.route('/hot')
         .get(hot.list_hot_posts)
 
+    app.route('/posts/:postId/like')
+        .get(unagi.like_a_post);
+
+    app.route('/posts/:postId/unlike')
+        .get(unagi.unlike_a_post);
 };

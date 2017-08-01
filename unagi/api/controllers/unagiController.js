@@ -2,20 +2,24 @@
 
 //error messages:
 const USER_ERROR = "User error has occurred";
-const LOC_ERROR = "No location has been sent.";
+const LOC_NOT_FOUND_ERROR = "No location has been sent.";
+const LOC_NOT_VALID_ERROR = "Location is sent but is not valid";
 const TEXT_ERROR = "No text has been sent";
 const NUMBER_OF_CHARACTERS_ERROR = "Illegal number of characters, more than 160 characters has been sent";
 const UNLIKE_ERROR = "Unlike request has failed";
 const LIKE_ERROR = "Like request has failed";
 const ALREADY_LIKED_ERROR = "You have already liked this post";
-const NOT_LIKED_UNLIKE_ERROR = "You hadn't liked this post but you had requested to unlike it";
+const NOT_LIKED_UNLIKE_ERROR = "You have not liked this post but you had requested to unlike it";
 
 //app constants:
-const POST_PER_REQ = require('consts/appConsts').POST_PER_REQ;
-const CHARACTERS_BOUND = require('consts/appConsts').CHARACTERS_BOUND;
+const POST_PER_REQ = require('./consts/appConsts').POST_PER_REQ;
+const CHARACTERS_BOUND = require('./consts/appConsts').CHARACTERS_BOUND;
 
 //geographic constants:
-const radius = require('consts/geoConsts').radius;
+const radius = require('./consts/geoConsts').radius;
+
+//Validators:
+const lazyReqValidator = require("./validators/lazyReqValidator").lazyReqValidator;
 
 var mongoose = require('mongoose'),
     Post = mongoose.model('Posts'),
@@ -37,34 +41,36 @@ var list_all_posts = function (req, res) {
 exports.list_all_posts = list_all_posts;
 
 var list_lazy = function (req, res) {
-    var callback = (function (result) {
-        if (result === undefined) {
+    var callback = (function (person) {
+        if (person === undefined) {
             res.send(USER_ERROR);
         }
-        else if (req.query.latitude !== undefined && req.query.latitude !== undefined) {
-            console.log("Someone has requested to see posts " + req.query.latitude + " " + req.query.longitude);
-            let center = [req.query.latitude, req.query.longitude];
-            let post_itr = req.query.itr;
-            let lastPost = req.query.lastpost;
-            // var q = post.find({"loc":{"$geoWithin":{"$center":[center, radius]}}}.skip(0).limit(POST_PER_REQ))
-            Post.find({
-                "timestamp": {$lt: lastPost},
-                "location":
-                    {"$geoWithin": {"$center": [center, radius]}}
-            }, function (err, post) {
-                if (err) {
-                    console.log("Request is invalid");
-                    res.send(err);
-                }
-                send(post);
-                try {
-                    console.log("Lastpost : ", post[post.length - 1].timestamp);
-                } catch (error) {
-                    console.log("There's no post to see.");
-                }
-            }).limit(POST_PER_REQ);
-        } else {
-            console.log("Someone has requested to see posts but has no location.")
+        else {
+            var afterValidationCB = function (req, res, person) {
+                console.log(person);
+                console.log("Someone has requested to see posts " + req.query.latitude + " " + req.query.longitude);
+                let center = [req.query.latitude, req.query.longitude];
+                let lastPost = req.query.lastpost;
+                // var q = post.find({"loc":{"$geoWithin":{"$center":[center, radius]}}}.skip(0).limit(POST_PER_REQ))
+                Post.find({
+                    "timestamp": {$lt: lastPost},
+                    "location":
+                        {"$geoWithin": {"$center": [center, radius]}}
+                }, function (err, post) {
+                    if (err) {
+                        console.log("Request is invalid", lastPost);
+                        res.send(err);
+                    } else {
+                        send(req, res, post, person);
+                        try {
+                            console.log("Lastpost : ", post[post.length - 1].timestamp);
+                        } catch (error) {
+                            console.log("There's no post to see.");
+                        }
+                    }
+                }).limit(POST_PER_REQ);
+            };
+            lazyReqValidator(req, res, person, afterValidationCB);
         }
     });
     check_token(req, res, callback);
@@ -87,10 +93,10 @@ var create_a_post = function (req, res) {
                 }
                 else if (req.body.Longitude === undefined || req.body.Latitude === undefined) {
                     console.log({
-                        pop_up_error: LOC_ERROR
+                        pop_up_error: LOC_NOT_FOUND_ERROR
                     });
                     res.send({
-                        pop_up_error: LOC_ERROR
+                        pop_up_error: LOC_NOT_FOUND_ERROR
                     });
                 } else if (req.body.text === undefined) {
                     console.log(TEXT_ERROR);
@@ -141,11 +147,13 @@ exports.create_a_post = create_a_post;
 exports.read_a_post = function (req, res) {
     var callback = function (person) {
         if (person !== undefined) {
-            Post.findById(req.query.postId, function (err, post) {
+            Post.findOne({
+                id: req.params.postId
+            }, function (err, post) {
                 if (err) {
                     res.send(err);
                 } else {
-                    res.json(post);
+                    send(req, res, post, person);
                 }
             });
         } else {
@@ -214,7 +222,18 @@ exports.like_a_post = function (req, res) {
                         })
                     } else {
                         console.log("User " + userId + " liked post " + " " + postId + " SUCCESSFULLY");
-                        res.send(like);
+                        Post.findOne({
+                            id: postId
+                        }, function (err, post) {
+                            if (err) {
+                                res.send({
+                                    pop_up_error: LIKE_ERROR
+                                })
+                            } else {
+                                post.number_of_likes++;
+                                res.send(like);
+                            }
+                        });
                     }
                 });
             };
@@ -225,7 +244,7 @@ exports.like_a_post = function (req, res) {
                     console.log("Liking the post...");
                     callbackForLike();
                 } else {
-                    console.log("This user has already liked the post.")
+                    console.log("This user has already liked the post.");
                     res.send({
                         pop_up_error: ALREADY_LIKED_ERROR
                     })
@@ -261,7 +280,18 @@ exports.unlike_a_post = function (req, res) {
                             pop_up_error: UNLIKE_ERROR
                         });
                     } else {
-                        res.send("removed like" + like);
+                        Post.findOne({
+                            id: postId
+                        }, function (err, post) {
+                            if (err) {
+                                res.send({
+                                    pop_up_error: UNLIKE_ERROR
+                                })
+                            } else {
+                                post.number_of_likes--;
+                                res.send("removed like" + like);
+                            }
+                        });
                     }
                 })
             };
