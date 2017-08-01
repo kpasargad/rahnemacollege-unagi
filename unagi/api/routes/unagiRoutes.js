@@ -1,6 +1,7 @@
 'use strict';
 module.exports = function (app) {
     var unagi = require('../controllers/unagiController');
+    var hot = require('../controllers/hotController')
 
 
     // unagi Routes
@@ -15,4 +16,8 @@ module.exports = function (app) {
 
     app.route('/users/:token')
         .get(unagi.check_token);
+    
+    app.route('/hot')
+        .get(hot.list_hot_posts)
+
 };
