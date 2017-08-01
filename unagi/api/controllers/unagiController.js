@@ -11,11 +11,11 @@ const ALREADY_LIKED_ERROR = "You have already liked this post";
 const NOT_LIKED_UNLIKE_ERROR = "You hadn't liked this post but you had requested to unlike it";
 
 //app constants:
-const POST_PER_REQ = require('consts/appConsts').POST_PER_REQ;
-const CHARACTERS_BOUND = require('consts/appConsts').CHARACTERS_BOUND;
+const POST_PER_REQ = require('./consts/appConsts').POST_PER_REQ;
+const CHARACTERS_BOUND = require('./consts/appConsts').CHARACTERS_BOUND;
 
 //geographic constants:
-const radius = require('consts/geoConsts').radius;
+const radius = require('./consts/geoConsts').radius;
 
 var mongoose = require('mongoose'),
     Post = mongoose.model('Posts'),
@@ -142,7 +142,7 @@ exports.read_a_post = function (req, res) {
     var callback = function (person) {
         if (person !== undefined) {
             Post.findOne({
-                id : req.params.postId
+                id: req.params.postId
             }, function (err, post) {
                 if (err) {
                     res.send(err);
@@ -216,7 +216,18 @@ exports.like_a_post = function (req, res) {
                         })
                     } else {
                         console.log("User " + userId + " liked post " + " " + postId + " SUCCESSFULLY");
-                        res.send(like);
+                        Post.findOne({
+                            id: postId
+                        }, function (err, post) {
+                            if (err) {
+                                res.send({
+                                    pop_up_error: LIKE_ERROR
+                                })
+                            } else {
+                                post.number_of_likes++;
+                                res.send(like);
+                            }
+                        });
                     }
                 });
             };
@@ -263,7 +274,18 @@ exports.unlike_a_post = function (req, res) {
                             pop_up_error: UNLIKE_ERROR
                         });
                     } else {
-                        res.send("removed like" + like);
+                        Post.findOne({
+                            id: postId
+                        }, function (err, post) {
+                            if(err){
+                                res.send({
+                                    pop_up_error : UNLIKE_ERROR
+                                })
+                            }else {
+                                post.number_of_likes--;
+                                res.send("removed like" + like);
+                            }
+                        });
                     }
                 })
             };

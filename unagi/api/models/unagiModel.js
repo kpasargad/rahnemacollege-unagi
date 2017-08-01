@@ -14,21 +14,25 @@ var PostSchema = new Schema({
         required: true
     },
     location: {
-        type : {type : String},
-        coordinates : {
-            type : [Number]
+        type: {type: String},
+        coordinates: {
+            type: [Number]
         }
     },
-    author_id : {
-        type : Number,
-        required : true
+    author_id: {
+        type: Number,
+        required: true
     },
     timestamp: {
-        type : Number,
+        type: Number,
         default: Date.now
+    },
+    number_of_likes: {
+        type: Number,
+        default: 0
     }
 });
-PostSchema.index({"timestamp":-1, "location":1});
+PostSchema.index({"timestamp": -1, "location": 1});
 
 var UserSchema = new Schema({
     id: {
@@ -42,13 +46,13 @@ var UserSchema = new Schema({
 });
 
 var UsersPostsLikesSchema = new Schema({
-    postId : {
-        type : Number,
-        required : true
+    postId: {
+        type: Number,
+        required: true
     },
-    userId : {
-        type : Number,
-        required : true
+    userId: {
+        type: Number,
+        required: true
     }
 });
 
