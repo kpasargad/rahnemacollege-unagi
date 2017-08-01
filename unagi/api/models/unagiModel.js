@@ -34,6 +34,7 @@ var PostSchema = new Schema({
     },
     hotness:{
         type : Number,
+        default: 0,
         required : true
     }
 });
