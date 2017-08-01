@@ -233,7 +233,7 @@ exports.like_a_post = function (req, res) {
                                 })
                             } else {
                                 post.number_of_likes++;
-                                post.hotness = hotness(post.number_of_likes, post.timestamp);
+                                post.hotness = hotness(post);
                                 res.send(like);
                             }
                         });
@@ -292,7 +292,7 @@ exports.unlike_a_post = function (req, res) {
                                 })
                             } else {
                                 post.number_of_likes--;
-                                post.hotness = hotness(post.number_of_likes, post.timestamp);
+                                post.hotness = hotness(post);
                                 res.send("removed like" + like);
                             }
                         });
