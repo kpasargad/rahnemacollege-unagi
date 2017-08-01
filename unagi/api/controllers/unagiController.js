@@ -102,7 +102,7 @@ var list_lazy = function (req, res) {
                     console.log("Request is invalid");
                     res.send(err);
                 }
-                res.send(post);
+                send(post);
                 try {
                     console.log("Lastpost : ", post[post.length - 1].timestamp);
                 } catch (error) {
