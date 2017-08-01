@@ -1,8 +1,6 @@
 'use strict';
 
-const DISTANCE_RATE = 111.12;
-const POST_PER_REQ = 20;
-const radiusKM = 1000;
+//error messages:
 const USER_ERROR = "User error has occurred";
 const LOC_ERROR = "No location has been sent.";
 const TEXT_ERROR = "No text has been sent";
@@ -11,7 +9,13 @@ const UNLIKE_ERROR = "Unlike request has failed";
 const LIKE_ERROR = "Like request has failed";
 const ALREADY_LIKED_ERROR = "You have already liked this post";
 const NOT_LIKED_UNLIKE_ERROR = "You hadn't liked this post but you had requested to unlike it";
-const CHARACTERS_BOUND = 160;
+
+//app constants:
+const POST_PER_REQ = require('consts/appConsts').POST_PER_REQ;
+const CHARACTERS_BOUND = require('consts/appConsts').CHARACTERS_BOUND;
+
+//geographic constants:
+const radius = require('consts/geoConsts').radius;
 
 var mongoose = require('mongoose'),
     Post = mongoose.model('Posts'),
@@ -39,7 +43,6 @@ var list_lazy = function (req, res) {
         }
         else if (req.query.latitude !== undefined && req.query.latitude !== undefined) {
             console.log("Someone has requested to see posts " + req.query.latitude + " " + req.query.longitude);
-            let radius = radiusKM / DISTANCE_RATE;
             let center = [req.query.latitude, req.query.longitude];
             let post_itr = req.query.itr;
             let lastPost = req.query.lastpost;
