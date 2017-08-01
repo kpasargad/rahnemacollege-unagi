@@ -32,6 +32,17 @@ POST : localhost:3000/posts?token=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 
 Latitude and longitude have to be sent to the server in two types of requests:
 
+### Accessing a single post
+
+To accsess a single post the post id has to be sent to the server in url params.
+
+#### Example
+``` 
+POST : localhost:3000/posts/[postId]?token=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+
+POST : localhost:3000/posts/12?token=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+```
+
 #### 1. Posting a post
 
 When the device is posting a post the location has to be sent in the body.
@@ -64,8 +75,11 @@ GET : localhost:3000/posts?latitude=50&longitude=50&token=aaaaaaaaaaaaaaaaaaaaaa
 The results are sent in an array of posts, and each post consists of the following fields:
 
 * `id : Number`
+
 * `text : String`
+
 * `author_id : Number`
+
 * `location: {
             coordinates: [
                 Latitude,
@@ -73,7 +87,9 @@ The results are sent in an array of posts, and each post consists of the followi
             ],
             type: "Point"
         }`
+
 * `is_liked : Boolean`
+
 * `number_of_likes : number`
 
 #### Example
