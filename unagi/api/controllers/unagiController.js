@@ -141,11 +141,13 @@ exports.create_a_post = create_a_post;
 exports.read_a_post = function (req, res) {
     var callback = function (person) {
         if (person !== undefined) {
-            Post.findById(req.query.postId, function (err, post) {
+            Post.findOne({
+                id : req.params.postId
+            }, function (err, post) {
                 if (err) {
                     res.send(err);
                 } else {
-                    res.json(post);
+                    send(req, res, post, person);
                 }
             });
         } else {
