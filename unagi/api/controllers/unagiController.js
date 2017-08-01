@@ -1,8 +1,6 @@
 'use strict';
 
-const DISTANCE_RATE = 111.12;
-const POST_PER_REQ = 20;
-const radiusKM = 1000;
+//error messages:
 const USER_ERROR = "User error has occurred";
 const LOC_ERROR = "No location has been sent.";
 const TEXT_ERROR = "No text has been sent";
@@ -12,67 +10,22 @@ const LIKE_ERROR = "Like request has failed";
 const ALREADY_LIKED_ERROR = "You have already liked this post";
 const NOT_LIKED_UNLIKE_ERROR = "You hadn't liked this post but you had requested to unlike it";
 
-const CHARACTERS_BOUND = 160;
+//app constants:
+const POST_PER_REQ = require('consts/appConsts').POST_PER_REQ;
+const CHARACTERS_BOUND = require('consts/appConsts').CHARACTERS_BOUND;
+
+//geographic constants:
+const radius = require('consts/geoConsts').radius;
 
 var mongoose = require('mongoose'),
     Post = mongoose.model('Posts'),
     User = mongoose.model('Users'),
     Like = mongoose.model('Likes');
-var send = require('./unagiSendPost').send;
+var send = require('./sendPost').send;
 
-/**
- * returns a new user or the associated existing user.
- * returns undefined in case of error
- */
-var check_token = function (req, res, callback) {
-    console.log("CHECKING TOKEN");
-    console.log(req.query.token);
-    User.findOne({'token': req.query.token}, function (err, person) {
-        if (err) {
-            res.send(err);
-            callback(undefined);
-        }
-        if (person === null) {
-            console.log("creating new user");
-            create_a_user(req, res, callback);
-        } else {
-            console.log(person);
-            console.log("submitted user");
-            callback(person);
-        }
-    })
-};
-module.exports.check_token = check_token;
-var create_a_user = function (req, res, callback) {
-    var token = req.query.token;
-    User.findOne().sort({id: -1}).exec(function (err, person) {
-        if (err) {
-            res.send(err);
-            return undefined;
-        }
-        else {
-            var id = 1;
-            if (person === null) {
-                //do nothing
-            } else {
-                id = person.id + 1;
-            }
+var check_token = require('./tokenCheck').check_token;
+exports.check_token = check_token;
 
-            var new_user = new User({
-                token: req.query.token,
-                id: id
-            });
-
-            new_user.save(function (err, user) {
-                if (err) {
-                    callback(undefined);
-                } else {
-                    callback(new_user);
-                }
-            });
-        }
-    });
-};
 
 var list_all_posts = function (req, res) {
     Post.find({}, function (err, post) {
@@ -83,33 +36,36 @@ var list_all_posts = function (req, res) {
 };
 exports.list_all_posts = list_all_posts;
 
-
 var list_lazy = function (req, res) {
-    var callback = (function (person) {
-        if (person === undefined) {
-            res.send({
-                pop_up_error: USER_ERROR
-            });
+    var callback = (function (result) {
+        if (result === undefined) {
+            res.send(USER_ERROR);
         }
         else if (req.query.latitude !== undefined && req.query.latitude !== undefined) {
             console.log("Someone has requested to see posts " + req.query.latitude + " " + req.query.longitude);
-            let radius = radiusKM / DISTANCE_RATE;
             let center = [req.query.latitude, req.query.longitude];
             let post_itr = req.query.itr;
-
+            let lastPost = req.query.lastpost;
             // var q = post.find({"loc":{"$geoWithin":{"$center":[center, radius]}}}.skip(0).limit(POST_PER_REQ))
             Post.find({
+                "timestamp": {$lt: lastPost},
                 "location":
                     {"$geoWithin": {"$center": [center, radius]}}
             }, function (err, post) {
-                if (err) return handleError(err);
-                console.log(post);
-                send(req, res, post, person);
-            })
+                if (err) {
+                    console.log("Request is invalid");
+                    res.send(err);
+                }
+                send(post);
+                try {
+                    console.log("Lastpost : ", post[post.length - 1].timestamp);
+                } catch (error) {
+                    console.log("There's no post to see.");
+                }
+            }).limit(POST_PER_REQ);
         } else {
             console.log("Someone has requested to see posts but has no location.")
         }
-
     });
     check_token(req, res, callback);
 };
@@ -125,7 +81,6 @@ var create_a_post = function (req, res) {
             });
         }
         else {
-
             Post.findOne().sort({id: -1}).exec(function (err, post_with_highest_id) {
                 if (err) {
                     res.send(err)
@@ -179,7 +134,6 @@ var create_a_post = function (req, res) {
             });
         }
     };
-
     check_token(req, res, callback);
 };
 exports.create_a_post = create_a_post;
@@ -200,9 +154,9 @@ exports.read_a_post = function (req, res) {
             })
         }
     };
-
     check_token(req, res, callback);
 };
+
 //NOT-USED
 exports.update_a_post = function (req, res) {
     var callback = function (person) {
@@ -220,6 +174,7 @@ exports.update_a_post = function (req, res) {
     };
     check_token(req, res, callback);
 };
+
 exports.delete_a_post = function (req, res) {
     Post.remove({
         _id: req.query.postId
@@ -280,8 +235,9 @@ exports.like_a_post = function (req, res) {
     };
     check_token(req, res, callback);
 };
+
 /**
- * This function handles the ulike request.
+ * This function handles the unlike request.
  * @param req
  * @param res
  */
@@ -327,8 +283,8 @@ exports.unlike_a_post = function (req, res) {
                     }
                 }
             })
-
         }
     };
     check_token(req, res, callback);
 };
+

@@ -1,4 +1,5 @@
 'use strict';
+
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
@@ -21,8 +22,13 @@ var PostSchema = new Schema({
     author_id : {
         type : Number,
         required : true
+    },
+    timestamp: {
+        type : Number,
+        default: Date.now
     }
 });
+PostSchema.index({"timestamp":-1, "location":1});
 
 var UserSchema = new Schema({
     id: {
