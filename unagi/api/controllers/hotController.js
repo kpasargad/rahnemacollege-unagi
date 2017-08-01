@@ -1,7 +1,10 @@
 'use strict';
 
 var checkToken = require('./tokenCheck').check_token;
-var Post = mongoose.model('Posts');
+var hotness = require('./hotController').hotness;
+
+var mongoose = require('mongoose'),
+    Post = mongoose.model('Posts');
 
 var hotness = function (post) {
     likes = post.number_of_likes;
