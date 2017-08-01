@@ -1,13 +1,24 @@
 'use strict';
 
 const DISTANCE_RATE = 111.12;
-const POST_PER_REQ = 9;
+const POST_PER_REQ = 20;
 const radiusKM = 1000;
 const USER_ERROR = "User error has occurred";
 const LOC_ERROR = "No location has been sent.";
 const TEXT_ERROR = "No text has been sent";
 const NUMBER_OF_CHARACTERS_ERROR = "Illegal number of characters, more than 160 characters has been sent";
+const UNLIKE_ERROR = "Unlike request has failed";
+const LIKE_ERROR = "Like request has failed";
+const ALREADY_LIKED_ERROR = "You have already liked this post";
+const NOT_LIKED_UNLIKE_ERROR = "You hadn't liked this post but you had requested to unlike it";
 const CHARACTERS_BOUND = 160;
+
+var mongoose = require('mongoose'),
+    Post = mongoose.model('Posts'),
+    User = mongoose.model('Users'),
+    Like = mongoose.model('Likes');
+var send = require('./unagiSendPost').send;
+
 
 /*returns a new user or the associated existing user.
 * returns undefined in case of error
@@ -32,13 +43,34 @@ var check_token = function (req, res, callback) {
 };
 module.exports.check_token = check_token;
 
-var mongoose = require('mongoose'),
-    Post = mongoose.model('Posts'),
-    User = mongoose.model('Users');
-
-var assert = require('assert');
-
-///
+var create_a_user = function (req, res, callback) {
+    var token = req.query.token;
+    User.findOne().sort({id: -1}).exec(function (err, person) {
+        if (err) {
+            res.send(err);
+            return undefined;
+        }
+        else {
+            var id = 1;
+            if (person === null) {
+                //do nothing
+            } else {
+                id = person.id + 1;
+            }
+            var new_user = new User({
+                token: req.query.token,
+                id: id
+            });
+            new_user.save(function (err, user) {
+                if (err) {
+                    callback(undefined);
+                } else {
+                    callback(new_user);
+                }
+            });
+        }
+    });
+};
 
 var list_all_posts = function (req, res) {
     Post.find({}, function (err, post) {
@@ -62,7 +94,7 @@ var list_lazy = function (req, res) {
             let lastPost = req.query.lastpost;
             // var q = post.find({"loc":{"$geoWithin":{"$center":[center, radius]}}}.skip(0).limit(POST_PER_REQ))
             Post.find({
-                "timestamp": {$lt:lastPost},
+                "timestamp": {$lt: lastPost},
                 "location":
                     {"$geoWithin": {"$center": [center, radius]}}
             }, function (err, post) {
@@ -72,7 +104,7 @@ var list_lazy = function (req, res) {
                 }
                 res.send(post);
                 try {
-                    console.log("Lastpost : ", post[post.length-1].timestamp);
+                    console.log("Lastpost : ", post[post.length - 1].timestamp);
                 } catch (error) {
                     console.log("There's no post to see.");
                 }
@@ -85,27 +117,37 @@ var list_lazy = function (req, res) {
 };
 exports.list_lazy = list_lazy;
 
+
 var create_a_post = function (req, res) {
     var callback = function (person) {
         if (person === undefined) {
             console.log(USER_ERROR);
-            res.send(USER_ERROR);
+            res.send({
+                pop_up_error: USER_ERROR
+            });
         }
         else {
-            console.log("here");
             Post.findOne().sort({id: -1}).exec(function (err, post_with_highest_id) {
                 if (err) {
                     res.send(err)
                 }
                 else if (req.body.Longitude === undefined || req.body.Latitude === undefined) {
-                    console.log(LOC_ERROR);
-                    res.send(LOC_ERROR);
+                    console.log({
+                        pop_up_error: LOC_ERROR
+                    });
+                    res.send({
+                        pop_up_error: LOC_ERROR
+                    });
                 } else if (req.body.text === undefined) {
                     console.log(TEXT_ERROR);
-                    res.send(TEXT_ERROR);
+                    res.send({
+                        pop_up_error: TEXT_ERROR
+                    });
                 } else if (req.body.text.length > CHARACTERS_BOUND) {
                     console.log(NUMBER_OF_CHARACTERS_ERROR);
-                    res.send(NUMBER_OF_CHARACTERS_ERROR);
+                    res.send({
+                        pop_up_error: NUMBER_OF_CHARACTERS_ERROR
+                    });
                 } else {
                     var id = 1;
                     if (post_with_highest_id === null) {
@@ -121,7 +163,7 @@ var create_a_post = function (req, res) {
                             coordinates:
                                 [req.body.Latitude, req.body.Longitude]
                         },
-                        author_id : person.id
+                        author_id: person.id
                     });
                     console.log("new post:" + new_post);
                     new_post.save(function (err, post) {
@@ -138,27 +180,26 @@ var create_a_post = function (req, res) {
             });
         }
     };
-
     check_token(req, res, callback);
 };
-
 exports.create_a_post = create_a_post;
 
 exports.read_a_post = function (req, res) {
     var callback = function (person) {
         if (person !== undefined) {
-        Post.findById(req.query.postId, function (err, post) {
-            if (err) {
-                res.send(err);
-            } else {
-                res.json(post);
-            }
-        });
-        }else {
-            res.send(USER_ERROR)
+            Post.findById(req.query.postId, function (err, post) {
+                if (err) {
+                    res.send(err);
+                } else {
+                    res.json(post);
+                }
+            });
+        } else {
+            res.send({
+                pop_up_error: USER_ERROR
+            })
         }
     };
-
     check_token(req, res, callback);
 };
 
@@ -171,13 +212,14 @@ exports.update_a_post = function (req, res) {
                     res.send(err);
                 res.json(post);
             });
-        }else {
-            res.send(USER_ERROR)
+        } else {
+            res.send({
+                pop_up_error: USER_ERROR
+            })
         }
     };
     check_token(req, res, callback);
 };
-
 
 exports.delete_a_post = function (req, res) {
     Post.remove({
@@ -189,36 +231,105 @@ exports.delete_a_post = function (req, res) {
     });
 };
 
-var create_a_user = function (req, res, callback) {
-    var token = req.query.token;
-    User.findOne().sort({id: -1}).exec(function (err, person) {
-        if (err) {
-            res.send(err);
-            return undefined;
-        }
-        else {
-            var id = 1;
-            if (person === null) {
-                //do nothing
-            } else {
-                id = person.id + 1;
-            }
-
-            var new_user = new User({
-                token: req.query.token,
-                id: id
+/**
+ * This function handles like requests.
+ * @param req
+ * @param res
+ */
+exports.like_a_post = function (req, res) {
+    console.log("A request to like a post has been received.");
+    var postId = req.params.postId;
+    var callback = function (person) {
+        if (person === undefined) {
+            console.log(USER_ERROR);
+            res.send({
+                pop_up_error: USER_ERROR
             });
-
-            new_user.save(function (err, user) {
+        } else {
+            var userId = person.id;
+            var new_Like = new Like({
+                postId: postId,
+                userId: person.id
+            });
+            var callbackForLike = function () {
+                new_Like.save(function (err, like) {
+                    if (err) {
+                        console.log("User " + userId + " liked post " + " " + postId + " UNSUCCESSFULLY");
+                        res.send({
+                            pop_up_error: LIKE_ERROR
+                        })
+                    } else {
+                        console.log("User " + userId + " liked post " + " " + postId + " SUCCESSFULLY");
+                        res.send(like);
+                    }
+                });
+            };
+            Like.findOne({'postId': postId, 'userId': person.id}, function (err, like) {
                 if (err) {
-                    callback(undefined);
+                    res.send(err);
+                } else if (like === null) {
+                    console.log("Liking the post...");
+                    callbackForLike();
                 } else {
-                    callback(new_user);
+                    console.log("This user has already liked the post.")
+                    res.send({
+                        pop_up_error: ALREADY_LIKED_ERROR
+                    })
                 }
-            });
+            })
         }
-    });
+    };
+    check_token(req, res, callback);
 };
 
-//exports.create_a_user = create_a_user;
-
+/**
+ * This function handles the ulike request.
+ * @param req
+ * @param res
+ */
+exports.unlike_a_post = function (req, res) {
+    console.log("A request to unlike a post has been received.");
+    var postId = req.params.postId;
+    var callback = function (person) {
+        if (person === undefined) {
+            console.log(USER_ERROR);
+            res.send({
+                pop_up_error: USER_ERROR
+            });
+        } else {
+            var removalCallBack = function () {
+                Like.remove({
+                    postId: postId,
+                    userId: person.id
+                }, function (err, like) {
+                    if (err) {
+                        res.send({
+                            pop_up_error: UNLIKE_ERROR
+                        });
+                    } else {
+                        res.send("removed like" + like);
+                    }
+                })
+            };
+            Like.findOne({
+                postId: postId,
+                userId: person.id
+            }, function (err, like) {
+                if (err) {
+                    res.send({
+                        pop_up_error: UNLIKE_ERROR
+                    })
+                } else {
+                    if (like === null) {
+                        res.send({
+                            pop_up_error: NOT_LIKED_UNLIKE_ERROR
+                        })
+                    } else {
+                        removalCallBack();
+                    }
+                }
+            })
+        }
+    };
+    check_token(req, res, callback);
+};
