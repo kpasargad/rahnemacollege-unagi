@@ -1,7 +1,7 @@
 'use strict';
 module.exports = function (app) {
     var unagi = require('../controllers/unagiController');
-    var hot = require('../controllers/hotController')
+    var hot = require('../controllers/hotController');
 
 
     // unagi Routes

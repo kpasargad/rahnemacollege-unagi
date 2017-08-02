@@ -37,6 +37,7 @@ var sendPosts = function (req, res, posts, user) {
                 var donePosts = 0;
                 for (var i = 0; i < length; i++) {
                     var post = posts[i];
+                    console.log("Number Of Likes:" + post.number_of_likes);
                     var postHandler = function (post) {
                         sendingPosts[donePosts] = ({
                             id: post.id,
@@ -44,6 +45,7 @@ var sendPosts = function (req, res, posts, user) {
                             author_id: post.author_id,
                             location: post.location,
                             is_liked: (ids.indexOf(post.id) > -1),
+                            hotness:post.hotness,
                             number_of_likes: post.number_of_likes
                         });
                         donePosts++;

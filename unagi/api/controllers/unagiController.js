@@ -10,6 +10,7 @@ const UNLIKE_ERROR = "Unlike request has failed";
 const LIKE_ERROR = "Like request has failed";
 const ALREADY_LIKED_ERROR = "You have already liked this post";
 const NOT_LIKED_UNLIKE_ERROR = "You have not liked this post but you had requested to unlike it";
+const POST_NOT_FOUND_ERROR = "Your requested post doesn't exist";
 
 //app constants:
 const POST_PER_REQ = require('./consts/appConsts').POST_PER_REQ;
@@ -23,6 +24,7 @@ const lazyReqValidator = require("./validators/lazyReqValidator").lazyReqValidat
 
 //Other:
 var hotness = require('./hotController').hotness;
+var hotnessBaseValue = require('./hotController').hotnessBaseValue;
 var mongoose = require('mongoose'),
     Post = mongoose.model('Posts'),
     User = mongoose.model('Users'),
@@ -129,7 +131,8 @@ var create_a_post = function (req, res) {
                             coordinates: [req.body.Latitude, req.body.Longitude]
                         },
                         author_id: person.id,
-                        timestamp: Date.now()
+                        timestamp: Date.now(),
+                        hotness: hotnessBaseValue(Date.now())
                     });
                     console.log("new post:" + new_post);
                     new_post.save(function (err, post) {
@@ -233,19 +236,36 @@ exports.like_a_post = function (req, res) {
                         })
                     } else {
                         console.log("User " + userId + " liked post " + " " + postId + " SUCCESSFULLY");
-                        Post.findOne({
-                            id: postId
-                        }, function (err, post) {
-                            if (err) {
-                                res.send({
-                                    pop_up_error: LIKE_ERROR
-                                })
-                            } else {
-                                post.number_of_likes++;
-                                post.hotness = hotness(post);
-                                res.send(like);
+                        var query = {
+                            id : postId
+                        };
+
+                        Post.findOne(query ,function (err, post) {
+                            if(err){
+                                res.send(POST_NOT_FOUND_ERROR);
                             }
-                        });
+                            else {
+                                post.number_of_likes = post.number_of_likes + 1;
+                                var updateCB = function (hotness) {
+                                    console.log("hotness :" + hotness);
+                                    Post.findOneAndUpdate(query, {
+                                        $inc: {number_of_likes: 1},
+                                        $set: {hotness: hotness}
+                                    }, {new: true}, function (err, post) {
+                                        if (err) {
+                                            console.log("Something wrong when updating posts!");
+                                            res.send({
+                                                pop_up_error: post.number_of_likes
+                                            })
+                                        } else {
+                                            console.log(post);
+                                            res.send(like);
+                                        }
+                                    });
+                                };
+                                hotness(post, updateCB);
+                            }
+                        })
                     }
                 });
             };
@@ -295,19 +315,35 @@ exports.unlike_a_post = function (req, res) {
                             pop_up_error: UNLIKE_ERROR
                         });
                     } else {
-                        Post.findOne({
-                            id: postId
-                        }, function (err, post) {
-                            if (err) {
-                                res.send({
-                                    pop_up_error: UNLIKE_ERROR
-                                })
-                            } else {
-                                post.number_of_likes--;
-                                post.hotness = hotness(post);
-                                res.send("removed like" + like);
+                        var query = {
+                            id : postId
+                        };
+                        Post.findOne(query ,function (err, post) {
+                            if(err){
+                                res.send(POST_NOT_FOUND_ERROR);
                             }
-                        });
+                            else {
+                                post.number_of_likes = post.number_of_likes - 1;
+                                var updateCB = function (hotness) {
+                                    console.log("hotness :" + hotness);
+                                    Post.findOneAndUpdate(query, {
+                                        $inc: {number_of_likes: -1},
+                                        $set: {hotness: hotness}
+                                    }, {new: true}, function (err, post) {
+                                        if (err) {
+                                            console.log("Something wrong when updating posts!");
+                                            res.send({
+                                                pop_up_error: post.number_of_likes
+                                            })
+                                        } else {
+                                            console.log(post);
+                                            res.send(like);
+                                        }
+                                    });
+                                };
+                                hotness(post, updateCB);
+                            }
+                        })
                     }
                 })
             };
