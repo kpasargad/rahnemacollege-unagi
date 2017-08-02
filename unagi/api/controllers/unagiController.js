@@ -369,3 +369,5 @@ exports.unlike_a_post = function (req, res) {
     };
     check_token(req, res, callback);
 };
+
+exports.list_hot_posts = require('./hotController').list_hot_posts;

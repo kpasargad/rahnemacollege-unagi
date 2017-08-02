@@ -1,7 +1,7 @@
 'use strict';
 
 var checkToken = require('./tokenCheck').check_token;
-var hotness = require('./hotController').hotness;
+var send = require('./sendPost').send;
 
 var mongoose = require('mongoose'),
     Post = mongoose.model('Posts');
@@ -32,14 +32,15 @@ exports.list_hot_posts = function (req, res) {
     var callback = function (person) {
         Post.find()
             .sort({
-                hotness: 1
+                hotness: -1
             })
             .limit(10)
-            .exec(err, function (err, post) {
+            .exec(function (err, post){
+                console.log('BULLSHIT');
                 if (err) {
                     res.send(err);
                 } else {
-                    //TODO
+                    send(req, res, post , person);
                 }
             });
     };

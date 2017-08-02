@@ -15,7 +15,7 @@ module.exports = function (app) {
         .delete(unagi.delete_a_post);
 
     app.route('/hot')
-        .get(hot.list_hot_posts);
+        .get(unagi.list_hot_posts);
 
     app.route('/posts/:postId/like')
         .get(unagi.like_a_post);
