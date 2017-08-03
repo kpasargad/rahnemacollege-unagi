@@ -46,7 +46,8 @@ var sendPosts = function (req, res, posts, user) {
                             location: post.location,
                             is_liked: (ids.indexOf(post.id) > -1),
                             hotness:post.hotness,
-                            number_of_likes: post.number_of_likes
+                            number_of_likes: post.number_of_likes,
+                            timestamp: post.timestamp
                         });
                         donePosts++;
                         console.log("DONE POSTS:" + donePosts + " " + sendingPosts);
