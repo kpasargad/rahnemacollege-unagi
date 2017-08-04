@@ -22,13 +22,15 @@ const radius = require('./consts/geoConsts').radius;
 //Validators:
 const lazyReqValidator = require("./validators/lazyReqValidator").lazyReqValidator;
 
+
 //Other:
 var hotness = require('./hotController').hotness;
 var hotnessBaseValue = require('./hotController').hotnessBaseValue;
 var mongoose = require('mongoose'),
     Post = mongoose.model('Posts'),
     User = mongoose.model('Users'),
-    Like = mongoose.model('Likes');
+    Like = mongoose.model('Likes'),
+    Actions = mongoose.model('Actions');
 var send = require('./sendPost').send;
 
 var check_token = require('./tokenCheck').check_token;
@@ -236,8 +238,27 @@ exports.like_a_post = function (req, res) {
                         })
                     } else {
                         console.log("User " + userId + " liked post " + " " + postId + " SUCCESSFULLY");
-                        var query = {
-                            id : postId
+                        let query = {
+                            id: postId
+                        };
+
+                        let actionsCB = function() {
+                            let actionQuery = {
+                                userId: userId,
+                                postId: postId
+                            };
+                            Actions.findOneAndUpdate(
+                                actionQuery,
+                                {$set : {like  : 1}},
+                                {upsert : true, new : true},
+                                function (err, action) {
+                                    if(err){
+                                        console.log("Something went wrong while upserting an action(liking).")
+                                    }else {
+                                        console.log(action);
+                                    }
+                                });
+                            console.log("Inserted");
                         };
 
                         Post.findOne(query ,function (err, post) {
@@ -259,13 +280,14 @@ exports.like_a_post = function (req, res) {
                                             })
                                         } else {
                                             console.log(post);
+                                            actionsCB();
                                             res.send(like);
                                         }
                                     });
                                 };
                                 hotness(post, updateCB);
                             }
-                        })
+                        });
                     }
                 });
             };
@@ -323,6 +345,24 @@ exports.unlike_a_post = function (req, res) {
                                 res.send(POST_NOT_FOUND_ERROR);
                             }
                             else {
+                                let actionsCB = function() {
+                                    let actionQuery = {
+                                        userId: person.id,
+                                        postId: postId
+                                    };
+                                    Actions.findOneAndUpdate(
+                                        actionQuery,
+                                        {$set : {like  : 0}},
+                                        {upsert : true},
+                                        function (err, action) {
+                                            if(err){
+                                                console.log("Something went wrong while upserting an action(unliking).")
+                                            }else {
+                                                console.log(action);
+                                            }
+                                        });
+                                };
+
                                 post.number_of_likes = post.number_of_likes - 1;
                                 var updateCB = function (hotness) {
                                     console.log("hotness :" + hotness);
@@ -337,7 +377,8 @@ exports.unlike_a_post = function (req, res) {
                                             })
                                         } else {
                                             console.log(post);
-                                            res.send(like);
+                                            actionsCB();
+                                            res.send();
                                         }
                                     });
                                 };
