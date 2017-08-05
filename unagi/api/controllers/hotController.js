@@ -6,14 +6,14 @@ var send = require('./sendPost').send;
 var mongoose = require('mongoose'),
     Post = mongoose.model('Posts');
 
-var hotness = function (post, callback) {
+var hotness = function (res, post, person, callback) {
     //TODO: handle errors of unavailable posts.
     var likes = post.number_of_likes;
     console.log("NUMBER OF LIKES = ", likes);
     var date = post.timestamp / 1000;
     var order = Math.log10(Math.max(likes, 1), 10);
     var seconds = date - 1134028003;
-    callback(Math.round((order + seconds / 45000) * 10000000) / 10000000);
+    callback(res, post, person, Math.round((order + seconds / 45000) * 10000000) / 10000000);
 };
 exports.hotness = hotness;
 
