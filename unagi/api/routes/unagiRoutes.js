@@ -18,8 +18,8 @@ module.exports = function (app) {
         .get(unagi.list_hot_posts);
 
     app.route('/posts/:postId/like')
-        .get(unagi.like_a_post);
+        .post(unagi.like_a_post);
 
     app.route('/posts/:postId/unlike')
-        .get(unagi.unlike_a_post);
+        .post(unagi.unlike_a_post);
 };

@@ -1,20 +1,8 @@
 'use strict';
 
-//error messages:
-const USER_ERROR = "User error has occurred";
-const LOC_NOT_FOUND_ERROR = "No location has been sent.";
-const LOC_NOT_VALID_ERROR = "Location is sent but is not valid";
-const TEXT_ERROR = "No text has been sent";
-const NUMBER_OF_CHARACTERS_ERROR = "Illegal number of characters, more than 160 characters has been sent";
-const UNLIKE_ERROR = "Unlike request has failed";
-const LIKE_ERROR = "Like request has failed";
-const ALREADY_LIKED_ERROR = "You have already liked this post";
-const NOT_LIKED_UNLIKE_ERROR = "You have not liked this post but you had requested to unlike it";
-const POST_NOT_FOUND_ERROR = "Your requested post doesn't exist";
 
 //app constants:
 const POST_PER_REQ = require('./consts/appConsts').POST_PER_REQ;
-const CHARACTERS_BOUND = require('./consts/appConsts').CHARACTERS_BOUND;
 
 //geographic constants:
 const radius = require('./consts/geoConsts').radius;
@@ -22,13 +10,11 @@ const radius = require('./consts/geoConsts').radius;
 //Validators:
 const lazyReqValidator = require("./validators/lazyReqValidator").lazyReqValidator;
 
+
 //Other:
-var hotness = require('./hotController').hotness;
-var hotnessBaseValue = require('./hotController').hotnessBaseValue;
 var mongoose = require('mongoose'),
     Post = mongoose.model('Posts'),
-    User = mongoose.model('Users'),
-    Like = mongoose.model('Likes');
+    Actions = mongoose.model('Actions');
 var send = require('./sendPost').send;
 
 var check_token = require('./tokenCheck').check_token;
@@ -85,73 +71,6 @@ var list_lazy = function (req, res) {
 };
 exports.list_lazy = list_lazy;
 
-
-var create_a_post = function (req, res) {
-    var callback = function (person) {
-        if (person === undefined) {
-            console.log(USER_ERROR);
-            res.send({
-                pop_up_error: USER_ERROR
-            });
-        } else {
-            Post.findOne().sort({
-                id: -1
-            }).exec(function (err, post_with_highest_id) {
-                if (err) {
-                    res.send(err)
-                } else if (req.body.Longitude === undefined || req.body.Latitude === undefined) {
-                    console.log({
-                        pop_up_error: LOC_NOT_FOUND_ERROR
-                    });
-                    res.send({
-                        pop_up_error: LOC_NOT_FOUND_ERROR
-                    });
-                } else if (req.body.text === undefined) {
-                    console.log(TEXT_ERROR);
-                    res.send({
-                        pop_up_error: TEXT_ERROR
-                    });
-                } else if (req.body.text.length > CHARACTERS_BOUND) {
-                    console.log(NUMBER_OF_CHARACTERS_ERROR);
-                    res.send({
-                        pop_up_error: NUMBER_OF_CHARACTERS_ERROR
-                    });
-                } else {
-                    var id = 1;
-                    if (post_with_highest_id === null) {
-                        //do nothing
-                    } else {
-                        id = post_with_highest_id.id + 1;
-                    }
-                    var new_post = new Post({
-                        id: id,
-                        text: req.body.text,
-                        location: {
-                            type: "Point",
-                            coordinates: [req.body.Latitude, req.body.Longitude]
-                        },
-                        author_id: person.id,
-                        timestamp: Date.now(),
-                        hotness: hotnessBaseValue(Date.now())
-                    });
-                    console.log("new post:" + new_post);
-                    new_post.save(function (err, post) {
-                        if (err) {
-                            console.log("error in saving the post.");
-                            res.send(err);
-                        } else {
-                            console.log("post is saved.");
-                            res.json(post);
-                        }
-                    });
-                }
-            });
-        }
-    };
-    check_token(req, res, callback);
-};
-exports.create_a_post = create_a_post;
-
 exports.read_a_post = function (req, res) {
     var callback = function (person) {
         if (person !== undefined) {
@@ -207,167 +126,7 @@ exports.delete_a_post = function (req, res) {
     });
 };
 
-/**
- * This function handles like requests.
- * @param req
- * @param res
- */
-exports.like_a_post = function (req, res) {
-    console.log("A request to like a post has been received.");
-    var postId = req.params.postId;
-    var callback = function (person) {
-        if (person === undefined) {
-            console.log(USER_ERROR);
-            res.send({
-                pop_up_error: USER_ERROR
-            });
-        } else {
-            var userId = person.id;
-            var new_Like = new Like({
-                postId: postId,
-                userId: person.id
-            });
-            var callbackForLike = function () {
-                new_Like.save(function (err, like) {
-                    if (err) {
-                        console.log("User " + userId + " liked post " + " " + postId + " UNSUCCESSFULLY");
-                        res.send({
-                            pop_up_error: LIKE_ERROR
-                        })
-                    } else {
-                        console.log("User " + userId + " liked post " + " " + postId + " SUCCESSFULLY");
-                        var query = {
-                            id : postId
-                        };
-
-                        Post.findOne(query ,function (err, post) {
-                            if(err){
-                                res.send(POST_NOT_FOUND_ERROR);
-                            }
-                            else {
-                                post.number_of_likes = post.number_of_likes + 1;
-                                var updateCB = function (hotness) {
-                                    console.log("hotness :" + hotness);
-                                    Post.findOneAndUpdate(query, {
-                                        $inc: {number_of_likes: 1},
-                                        $set: {hotness: hotness}
-                                    }, {new: true}, function (err, post) {
-                                        if (err) {
-                                            console.log("Something wrong when updating posts!");
-                                            res.send({
-                                                pop_up_error: post.number_of_likes
-                                            })
-                                        } else {
-                                            console.log(post);
-                                            res.send(like);
-                                        }
-                                    });
-                                };
-                                hotness(post, updateCB);
-                            }
-                        })
-                    }
-                });
-            };
-            Like.findOne({
-                'postId': postId,
-                'userId': person.id
-            }, function (err, like) {
-                if (err) {
-                    res.send(err);
-                } else if (like === null) {
-                    console.log("Liking the post...");
-                    callbackForLike();
-                } else {
-                    console.log("This user has already liked the post.");
-                    res.send({
-                        pop_up_error: ALREADY_LIKED_ERROR
-                    })
-                }
-            })
-        }
-    };
-    check_token(req, res, callback);
-};
-
-/**
- * This function handles the unlike request.
- * @param req
- * @param res
- */
-exports.unlike_a_post = function (req, res) {
-    console.log("A request to unlike a post has been received.");
-    var postId = req.params.postId;
-    var callback = function (person) {
-        if (person === undefined) {
-            console.log(USER_ERROR);
-            res.send({
-                pop_up_error: USER_ERROR
-            });
-        } else {
-            var removalCallBack = function () {
-                Like.remove({
-                    postId: postId,
-                    userId: person.id
-                }, function (err, like) {
-                    if (err) {
-                        res.send({
-                            pop_up_error: UNLIKE_ERROR
-                        });
-                    } else {
-                        var query = {
-                            id : postId
-                        };
-                        Post.findOne(query ,function (err, post) {
-                            if(err){
-                                res.send(POST_NOT_FOUND_ERROR);
-                            }
-                            else {
-                                post.number_of_likes = post.number_of_likes - 1;
-                                var updateCB = function (hotness) {
-                                    console.log("hotness :" + hotness);
-                                    Post.findOneAndUpdate(query, {
-                                        $inc: {number_of_likes: -1},
-                                        $set: {hotness: hotness}
-                                    }, {new: true}, function (err, post) {
-                                        if (err) {
-                                            console.log("Something wrong when updating posts!");
-                                            res.send({
-                                                pop_up_error: post.number_of_likes
-                                            })
-                                        } else {
-                                            console.log(post);
-                                            res.send(like);
-                                        }
-                                    });
-                                };
-                                hotness(post, updateCB);
-                            }
-                        })
-                    }
-                })
-            };
-            Like.findOne({
-                postId: postId,
-                userId: person.id
-            }, function (err, like) {
-                if (err) {
-                    res.send({
-                        pop_up_error: UNLIKE_ERROR
-                    })
-                } else {
-                    if (like === null) {
-                        res.send({
-                            pop_up_error: NOT_LIKED_UNLIKE_ERROR
-                        })
-                    } else {
-                        removalCallBack();
-                    }
-                }
-            })
-        }
-    };
-    check_token(req, res, callback);
-};
-
 exports.list_hot_posts = require('./hotController').list_hot_posts;
+exports.like_a_post = require('./like').like_a_post;
+exports.unlike_a_post = require('./unlike').unlike_a_post;
+exports.create_a_post = require('./createPost').create_a_post;
