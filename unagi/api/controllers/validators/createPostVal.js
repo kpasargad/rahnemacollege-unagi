@@ -1,10 +1,10 @@
-
 const CHARACTERS_BOUND = require('./../consts/appConsts').CHARACTERS_BOUND;
 
 var mongoose = require('mongoose'),
     Post = mongoose.model('Posts'),
-    Actions = mongoose.model('Actions'),
-    Like = mongoose.model('Likes');
+    Actions = mongoose.model('Actions');
+
+var ERR = require('./../consts/errConsts');
 
 exports.createPostVal = function (req, res , person, callback) {
     Post.findOne().sort({

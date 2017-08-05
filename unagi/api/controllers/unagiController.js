@@ -135,7 +135,7 @@ var unlike_a_post = require('./unlike').unlike_a_post;
 exports.create_a_post = require('./createPost').create_a_post;
 
 exports.activity = function (req, res) {
-    console.log("HERE");
+    console.log("Activity request received");
     if (req.body.action !== undefined) {
         if (req.body.postId !== undefined) {
             if (req.body.action === "like") {

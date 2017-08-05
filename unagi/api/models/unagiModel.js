@@ -49,17 +49,6 @@ var UserSchema = new Schema({
     }
 });
 
-var UsersPostsLikesSchema = new Schema({
-    postId: {
-        type: Number,
-        required: true
-    },
-    userId: {
-        type: Number,
-        required: true
-    }
-});
-
 var actionsSchema = new Schema({
     userId: {
         type: Number,
@@ -84,6 +73,5 @@ var actionsSchema = new Schema({
 module.exports = {
     posts: mongoose.model('Posts', PostSchema),
     users: mongoose.model('Users', UserSchema),
-    likes: mongoose.model('Likes', UsersPostsLikesSchema),
     actions: mongoose.model('Actions', actionsSchema)
 };

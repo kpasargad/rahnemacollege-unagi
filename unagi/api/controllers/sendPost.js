@@ -2,7 +2,7 @@
 var mongoose = require('mongoose'),
     PostModel = mongoose.model('Posts'),
     UserModel = mongoose.model('Users'),
-    LikeModel = mongoose.model('Likes');
+    LikeModel = mongoose.model('Actions');
 
 /**
  * This function handles to-be-sent posts.
@@ -22,7 +22,7 @@ var sendPosts = function (req, res, posts, user) {
         }
         else {
             var ids = [...new Set(likedPosts.map(function (item) {
-                if (item !== undefined) {
+                if (item !== undefined && item.like === 1) {
                     return item.postId
                 } else {
                     return undefined;
