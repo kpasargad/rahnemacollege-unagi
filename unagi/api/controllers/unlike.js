@@ -42,7 +42,7 @@ exports.unlike_a_post = function (req, res) {
                             id: postId
                         };
                         Post.findOne(query, function (err, post) {
-                            if (err) {
+                            if (err || post === null || post === undefined) {
                                 res.send(ERR.POST_NOT_FOUND_ERROR);
                             }
                             else {
