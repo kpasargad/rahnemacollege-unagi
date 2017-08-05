@@ -10,6 +10,8 @@ const NOT_LIKED_UNLIKE_ERROR = "You have not liked this post but you had request
 const POST_NOT_FOUND_ERROR = "Your requested post doesn't exist";
 const LAST_POST_NOT_FOUND_ERROR = "You have not sent the last post";
 const LAST_POST_NOT_VALID_ERROR = "Lastpost is not an integer.";
+const INVALID_TOKEN_ERROR = "Token doesn't satisfy server conditions";
+const TOKEN_NOT_SENT_ERROR = "No token has been sent to server";
 
 module.exports = {
     LIKE_ERROR : LIKE_ERROR,
@@ -23,5 +25,8 @@ module.exports = {
     NOT_LIKED_UNLIKE_ERROR : NOT_LIKED_UNLIKE_ERROR,
     POST_NOT_FOUND_ERROR: POST_NOT_FOUND_ERROR,
     LAST_POST_NOT_FOUND_ERROR: LAST_POST_NOT_FOUND_ERROR,
-    LAST_POST_NOT_VALID_ERROR : LAST_POST_NOT_VALID_ERROR
+    LAST_POST_NOT_VALID_ERROR : LAST_POST_NOT_VALID_ERROR,
+    INVALID_TOKEN_ERROR : INVALID_TOKEN_ERROR,
+    TOKEN_NOT_SENT_ERROR : TOKEN_NOT_SENT_ERROR
+
 };

@@ -35,12 +35,12 @@ exports.list_hot_posts = function (req, res) {
                 hotness: -1
             })
             .limit(10)
-            .exec(function (err, post){
+            .exec(function (err, post) {
                 console.log('BULLSHIT');
                 if (err) {
                     res.send(err);
                 } else {
-                    send(req, res, post , person);
+                    send(req, res, post, person);
                 }
             });
     };

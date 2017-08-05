@@ -10,6 +10,7 @@ const radius = require('./consts/geoConsts').radius;
 //Validators:
 const lazyReqValidator = require("./validators/lazyReqVal").lazyReqValidator;
 
+const ERR = require('./consts/errConsts');
 
 //Other:
 var mongoose = require('mongoose'),
@@ -33,7 +34,9 @@ exports.list_all_posts = list_all_posts;
 var list_lazy = function (req, res) {
     var callback = (function (person) {
         if (person === undefined) {
-            res.send(USER_ERROR);
+            res.send({
+                pop_up_error : ERR.USER_ERROR
+            });
         } else {
             var afterValidationCB = function (req, res, person) {
                 console.log(person);
@@ -85,7 +88,7 @@ exports.read_a_post = function (req, res) {
             });
         } else {
             res.send({
-                pop_up_error: USER_ERROR
+                pop_up_error: ERR.USER_ERROR
             })
         }
     };
@@ -107,7 +110,7 @@ exports.update_a_post = function (req, res) {
             });
         } else {
             res.send({
-                pop_up_error: USER_ERROR
+                pop_up_error: ERR.USER_ERROR
             })
         }
     };
