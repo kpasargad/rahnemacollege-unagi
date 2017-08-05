@@ -8,7 +8,7 @@ const POST_PER_REQ = require('./consts/appConsts').POST_PER_REQ;
 const radius = require('./consts/geoConsts').radius;
 
 //Validators:
-const lazyReqValidator = require("./validators/lazyReqValidator").lazyReqValidator;
+const lazyReqValidator = require("./validators/lazyReqVal").lazyReqValidator;
 
 
 //Other:

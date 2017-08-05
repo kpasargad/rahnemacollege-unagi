@@ -8,6 +8,8 @@ const NUMBER_OF_CHARACTERS_ERROR = "Illegal number of characters, more than 160 
 const UNLIKE_ERROR = "Unlike request has failed";
 const NOT_LIKED_UNLIKE_ERROR = "You have not liked this post but you had requested to unlike it";
 const POST_NOT_FOUND_ERROR = "Your requested post doesn't exist";
+const LAST_POST_NOT_FOUND_ERROR = "You have not sent the last post";
+const LAST_POST_NOT_VALID_ERROR = "Lastpost is not an integer.";
 
 module.exports = {
     LIKE_ERROR : LIKE_ERROR,
@@ -19,5 +21,7 @@ module.exports = {
     NUMBER_OF_CHARACTERS_ERROR : NUMBER_OF_CHARACTERS_ERROR,
     UNLIKE_ERROR : UNLIKE_ERROR,
     NOT_LIKED_UNLIKE_ERROR : NOT_LIKED_UNLIKE_ERROR,
-    POST_NOT_FOUND_ERROR: POST_NOT_FOUND_ERROR
+    POST_NOT_FOUND_ERROR: POST_NOT_FOUND_ERROR,
+    LAST_POST_NOT_FOUND_ERROR: LAST_POST_NOT_FOUND_ERROR,
+    LAST_POST_NOT_VALID_ERROR : LAST_POST_NOT_VALID_ERROR
 };
