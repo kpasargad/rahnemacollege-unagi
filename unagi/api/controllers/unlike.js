@@ -20,7 +20,7 @@ var hotness = require('./hotController').hotness;
  */
 exports.unlike_a_post = function (req, res) {
     console.log("A request to unlike a post has been received.");
-    var postId = req.params.postId;
+    var postId = req.body.postId;
     var callback = function (person) {
         if (person === undefined) {
             console.log(ERR.USER_ERROR);

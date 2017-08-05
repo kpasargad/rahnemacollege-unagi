@@ -67,12 +67,12 @@ var callbackForLike = function (res, postId, person) {
         } else {
             console.log("User " + userId + " liked post " + " " + postId + " SUCCESSFULLY");
             let query = {
-              id : postId
+                id: postId
             };
             Post.findOne(query, function (err, post) {
                 if (err || post === undefined || post === null) {
                     res.send({
-                        pop_up_error:ERR.POST_NOT_FOUND_ERROR
+                        pop_up_error: ERR.POST_NOT_FOUND_ERROR
                     });
                 }
                 else {
