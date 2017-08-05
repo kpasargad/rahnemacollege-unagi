@@ -7,7 +7,11 @@ var express = require('express'),
   bodyParser = require('body-parser');
   
 mongoose.Promise = global.Promise;
-mongoose.connect('mongodb://localhost/unagidb'); 
+var options = {
+	  user: 'admin',
+	  pass: '4KhandRah1'
+}
+mongoose.connect('mongodb://localhost/unagidb', options); 
 
 
 app.use(bodyParser.urlencoded({ extended: true }));
