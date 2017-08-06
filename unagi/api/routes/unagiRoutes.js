@@ -1,7 +1,6 @@
 'use strict';
 module.exports = function (app) {
     var unagi = require('../controllers/unagiController');
-    var hot = require('../controllers/hotController');
 
 
     // unagi Routes
@@ -17,9 +16,6 @@ module.exports = function (app) {
     app.route('/hot')
         .get(unagi.list_hot_posts);
 
-    app.route('/posts/:postId/like')
-        .post(unagi.like_a_post);
-
-    app.route('/posts/:postId/unlike')
-        .post(unagi.unlike_a_post);
+    app.route('/posts/activity')
+        .post(unagi.activity);
 };

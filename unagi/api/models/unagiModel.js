@@ -36,6 +36,7 @@ var PostSchema = new Schema({
         default: 0
     }
 });
+
 PostSchema.index({"timestamp": -1, "location": 1});
 
 var UserSchema = new Schema({
@@ -45,17 +46,6 @@ var UserSchema = new Schema({
     },
     token: {
         type: String,
-        required: true
-    }
-});
-
-var UsersPostsLikesSchema = new Schema({
-    postId: {
-        type: Number,
-        required: true
-    },
-    userId: {
-        type: Number,
         required: true
     }
 });
@@ -84,6 +74,5 @@ var actionsSchema = new Schema({
 module.exports = {
     posts: mongoose.model('Posts', PostSchema),
     users: mongoose.model('Users', UserSchema),
-    likes: mongoose.model('Likes', UsersPostsLikesSchema),
     actions: mongoose.model('Actions', actionsSchema)
 };

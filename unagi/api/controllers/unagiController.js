@@ -8,8 +8,9 @@ const POST_PER_REQ = require('./consts/appConsts').POST_PER_REQ;
 const radius = require('./consts/geoConsts').radius;
 
 //Validators:
-const lazyReqValidator = require("./validators/lazyReqValidator").lazyReqValidator;
+const lazyReqValidator = require("./validators/lazyReqVal").lazyReqValidator;
 
+const ERR = require('./consts/errConsts');
 
 //Other:
 var mongoose = require('mongoose'),
@@ -33,7 +34,9 @@ exports.list_all_posts = list_all_posts;
 var list_lazy = function (req, res) {
     var callback = (function (person) {
         if (person === undefined) {
-            res.send(USER_ERROR);
+            res.send({
+                pop_up_error: ERR.USER_ERROR
+            });
         } else {
             var afterValidationCB = function (req, res, person) {
                 console.log(person);
@@ -85,7 +88,7 @@ exports.read_a_post = function (req, res) {
             });
         } else {
             res.send({
-                pop_up_error: USER_ERROR
+                pop_up_error: ERR.USER_ERROR
             })
         }
     };
@@ -107,7 +110,7 @@ exports.update_a_post = function (req, res) {
             });
         } else {
             res.send({
-                pop_up_error: USER_ERROR
+                pop_up_error: ERR.USER_ERROR
             })
         }
     };
@@ -127,6 +130,27 @@ exports.delete_a_post = function (req, res) {
 };
 
 exports.list_hot_posts = require('./hotController').list_hot_posts;
-exports.like_a_post = require('./like').like_a_post;
-exports.unlike_a_post = require('./unlike').unlike_a_post;
+var like_a_post = require('./like').like_a_post;
+var unlike_a_post = require('./unlike').unlike_a_post;
 exports.create_a_post = require('./createPost').create_a_post;
+
+exports.activity = function (req, res) {
+    console.log("Activity request received");
+    if (req.body.action !== undefined) {
+        if (req.body.postId !== undefined) {
+            if (req.body.action === "like") {
+                like_a_post(req, res);
+            } else if (req.body.action === "unlike") {
+                unlike_a_post(req, res);
+            }
+        } else {
+            res.send({
+                pop_up_error: ERR.ACTION_POST_ID_NOT_SENT_ERROR
+            });
+        }
+    } else {
+        res.send({
+            pop_up_error: ERR.ACTION_NOT_SENT_ERROR
+        });
+    }
+};
