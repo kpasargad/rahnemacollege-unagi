@@ -1,4 +1,4 @@
-# Team_One
+# Team One Server
 Team One's repository
 
 ## UI requests rules
@@ -9,7 +9,7 @@ The tokens are generated in the device and sent to the server; If they do not ex
 
 The server recieves the tokens in any request's query. Here is a sample request to send a post:
 
-*The token has to be in 32 characters but this is not checked in the server deliberately for development ease.*
+*The token has to be in 32 characters but applying this restriction is controlled by changing `applyTokenSize` in `Server/unagi/api/controllers/consts/tokenConst.js`.*
 
 ##### Headers:
 
@@ -19,7 +19,7 @@ POST : localhost:3000/posts?token=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 
 ##### Body:
 
-```
+```javascript
 {
 	"text" : "Hello Server",
 	"Latitude" : 80.1232,
@@ -49,7 +49,7 @@ When the device is posting a post the location has to be sent in the body.
 
 ##### Example
 
-```
+```javascript
 {
 	"text" : "Hello Server",
 	"Latitude" : 80.1232,
@@ -66,6 +66,19 @@ The device has to send the location in the header query when it wants to send a 
 
 ``` 
 GET : localhost:3000/posts?latitude=50&longitude=50&token=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+```
+### 3. Actions on posts
+
+The client has to send a POST request to `/posts/activity` with `token` as it's header and send the `ActionType` and `postId` in body.
+
+##### Example for liking a post
+```javascript
+POST:localhost:3000/posts/activity?token=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+
+{
+	"action" : "like",
+	"postId" : "1"
+}
 ```
 
 ## Server's answers' rules
@@ -94,7 +107,7 @@ The results are sent in an array of posts, and each post consists of the followi
 
 #### Example
 
-```
+```javascript
 [
     {
         "id": 8,
@@ -126,3 +139,13 @@ The results are sent in an array of posts, and each post consists of the followi
     }
 ]
 ```
+
+### Activities results
+
+The server sends a JSON which it might contain one of the following fields:
+
+`success` (which means the activity has been finished successfully)
+
+`pop_up_error` (An error (mostly an exception) with a messege)
+
+or none of the above which it might be because of database failures.
