@@ -144,20 +144,20 @@ app.use('/api', apiRoutes);
 module.exports = function (app) {
     var unagi = require('../controllers/unagiController');
 
-    // unagi Routes
-    app.route('/api/posts')
-        .get(unagi.list_lazy)
-        .post(unagi.create_a_post);
+    // // unagi Routes
+    // app.route('/api/posts')
+    //     .get(unagi.list_lazy)
+    //     .post(unagi.create_a_post);
 
-    app.route('/api/posts/:postId')
-        .get(unagi.read_a_post)
-        .put(unagi.update_a_post)
-        .delete(unagi.delete_a_post);
+    // app.route('/api/posts/:postId')
+    //     .get(unagi.read_a_post)
+    //     .put(unagi.update_a_post)
+    //     .delete(unagi.delete_a_post);
 
-    app.route('/api/hot')
-        .get(unagi.list_hot_posts);
+    // app.route('/api/hot')
+    //     .get(unagi.list_hot_posts);
 
-    app.route('/api/posts/activity')
-        .post(unagi.activity);
+    // app.route('/api/posts/activity')
+    //     .post(unagi.activity);
 
 };
