@@ -1,7 +1,7 @@
 'use strict';
 
 var express = require('express'),
-    app=express(),
+    app = express(),
     apiRoutes = express.Router(),
     User = require('./../models/unagiModel').users,
     jwt = require('jsonwebtoken');
