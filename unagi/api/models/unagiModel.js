@@ -14,7 +14,9 @@ var PostSchema = new Schema({
         required: true
     },
     location: {
-        type: {type: String},
+        type: {
+            type: String
+        },
         coordinates: {
             type: [Number]
         }
@@ -37,17 +39,37 @@ var PostSchema = new Schema({
     }
 });
 
-PostSchema.index({"timestamp": -1, "location": 1});
+PostSchema.index({
+    "timestamp": -1,
+    "location": 1
+});
 
 var UserSchema = new Schema({
     id: {
         type: Number,
+        // required: true
+    },
+    name: {
+        type: String,
         required: true
     },
-    token: {
+    username: {
+        type: String,
+        required: true
+    },
+    password: {
+        //TODO: to be hashed
+        type: String,
+        required: true
+    },
+    email: {
         type: String,
         required: true
     }
+    // token: {
+    //     type: String,
+    //     required: true
+    // }
 });
 
 var actionsSchema = new Schema({
@@ -62,14 +84,15 @@ var actionsSchema = new Schema({
     like: {
         type: Number,
         default: 0,
-        required : true
+        required: true
     },
     share: {
-        type : Number,
-        default : 0,
-        required : true
+        type: Number,
+        default: 0,
+        required: true
     }
 });
+
 
 module.exports = {
     posts: mongoose.model('Posts', PostSchema),
