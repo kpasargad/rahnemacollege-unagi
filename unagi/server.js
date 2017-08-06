@@ -11,7 +11,7 @@ var options = {
 	  user: 'admin',
 	  pass: '4KhandRah1'
 }
-mongoose.connect('mongodb://localhost/unagidb);
+mongoose.connect('mongodb://localhost/unagidb');
 
 
 app.use(bodyParser.urlencoded({ extended: true }));
