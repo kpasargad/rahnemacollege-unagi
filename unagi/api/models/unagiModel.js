@@ -36,6 +36,7 @@ var PostSchema = new Schema({
         default: 0
     }
 });
+
 PostSchema.index({"timestamp": -1, "location": 1});
 
 var UserSchema = new Schema({
