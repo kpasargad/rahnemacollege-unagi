@@ -3,9 +3,7 @@
 var mongoose = require('mongoose'),
     UserModel = mongoose.model('Users');
 
-var app = require('./../routes/unagiRoutes').app;
-var tokenConst = require('./consts/tokenConst'),
-    jwt = require('jsonwebtoken');
+var tokenConst = require('./consts/tokenConst');
 
 var ERR = require('./consts/errConsts');
 
