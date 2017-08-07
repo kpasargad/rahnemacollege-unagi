@@ -5,6 +5,7 @@ var express = require('express'),
     router = express.Router(),
     User = require('./../models/unagiModel').users,
     config = require('./../../config'),
+    unagi=require('./../controllers/unagiController'),
     jwt = require('jsonwebtoken');
 
 app.set('superSecret', config.secret);
@@ -128,45 +129,21 @@ router.use('/api', function (req, res, next) {
     }
 });
 
-// app.route('/posts/:postId')
-//     .get(unagi.read_a_post);
 
-
-
-
-
-
-// route to return all users (GET http://localhost:8080/api/users)
 router.get('/api/users', function (req, res) {
     User.find({}, function (err, users) {
         res.json(users);
     });
 });
 
+router.get('/api/posts',unagi.list_lazy);
 
-// apply the routes to our application with the prefix /api
-// app.use('/api', router);
+router.post('/api/posts',unagi.create_a_post);
+
+router.get('/api/posts/:postId',unagi.read_a_post)
+
+router.get('/api/hot',unagi.list_hot_posts);
+
+router.post('/api/posts/activity',unagi.activity);
 
 module.exports.router = router;
-
-
-// module.exports = function (app) {
-//     var unagi = require('../controllers/unagiController');
-
-//     // // unagi Routes
-//     // app.route('/api/posts')
-//     //     .get(unagi.list_lazy)
-//     //     .post(unagi.create_a_post);
-
-//     // app.route('/api/posts/:postId')
-//     //     .get(unagi.read_a_post)
-//     //     .put(unagi.update_a_post)
-//     //     .delete(unagi.delete_a_post);
-
-//     // app.route('/api/hot')
-//     //     .get(unagi.list_hot_posts);
-
-//     // app.route('/api/posts/activity')
-//     //     .post(unagi.activity);
-
-// };
