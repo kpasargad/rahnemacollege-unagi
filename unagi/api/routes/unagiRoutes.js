@@ -5,11 +5,10 @@ var express = require('express'),
     router = express.Router(),
     User = require('./../models/unagiModel').users,
     config = require('./../../config'),
-    unagi=require('./../controllers/unagiController'),
+    unagi = require('./../controllers/unagiController'),
     jwt = require('jsonwebtoken');
 
 app.set('superSecret', config.secret);
-
 
 
 router.get('/', function (req, res) {
@@ -41,10 +40,6 @@ router.post('/signup', function (req, res) {
 });
 
 
-
-
-
-
 // route to authenticate a user (POST http://localhost:8080/api/authenticate)
 router.post('/signin', function (req, res) {
 
@@ -72,8 +67,8 @@ router.post('/signin', function (req, res) {
 
                 // if user is found and password is right
                 // create a token
-                var payload={
-                    'id':user.id
+                var payload = {
+                    'id': user.id
                 }
                 var token = jwt.sign(payload, app.get('superSecret'), {
                     expiresIn: 1440 // expires in 24 hours
@@ -110,7 +105,7 @@ router.use('/api', function (req, res, next) {
             } else {
                 // if everything is good, save to request for use in other routes
                 req.decoded = decoded;
-                next(req, res);
+                next();
             }
         });
 
@@ -128,20 +123,19 @@ router.use('/api', function (req, res, next) {
 
 router.get('/api/users', function (req, res) {
     User.find({}, function (err, users) {
+        console.log(users);
         res.json(users);
     });
 });
 
-router.get('/api/posts',unagi.list_lazy);
+router.get('/api/posts', unagi.list_lazy);
 
-router.post('/api/posts',unagi.create_a_post);
+router.post('/api/posts', unagi.create_a_post);
 
-router.get('/api/posts/:postId',unagi.read_a_post)
+router.get('/api/posts/:postId', unagi.read_a_post);
 
-router.get('/api/hot',unagi.list_hot_posts);
+router.get('/api/hot', unagi.list_hot_posts);
 
-router.post('/api/posts/activity',unagi.activity);
+router.post('/api/posts/activity', unagi.activity);
 
 module.exports.router = router;
-
-module.exports.app = app;

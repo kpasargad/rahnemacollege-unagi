@@ -69,18 +69,18 @@ var old_check_token = function (req, res, callback) {
     }
 };
 
-var check_token = function(req, res, callback){
-  console.log("fetching user");
-  var decoded = req.decoded;
-  UserModel.findOne({id : decoded.id}, function (err, person) {
-      if(err){
-          res.send({
-              pop_up_error : ERR.USER_ERROR
-          })
-      }
-      else {
-          callback(person);
-      }
-  });
+var check_token = function (req, res, callback) {
+    console.log("fetching user");
+    var decoded = req.decoded;
+    UserModel.findOne({id: decoded.id}, function (err, person) {
+        if (err) {
+            res.send({
+                pop_up_error: ERR.USER_ERROR
+            })
+        }
+        else {
+            callback(person);
+        }
+    });
 };
 module.exports.check_token = check_token;
