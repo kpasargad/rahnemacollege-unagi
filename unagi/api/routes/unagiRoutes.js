@@ -2,13 +2,20 @@
 
 var express = require('express'),
     app = express(),
-    apiRoutes = express.Router(),
+    router = express.Router(),
     User = require('./../models/unagiModel').users,
+    config = require('./../../config'),
     jwt = require('jsonwebtoken');
 
+app.set('superSecret', config.secret);
 
 
-app.post('/signup', function (req, res) {
+
+router.get('/', function (req, res) {
+    res.send("Welcome to root");
+})
+
+router.post('/signup', function (req, res) {
 
     //TODO: Consider Validations
 
@@ -38,7 +45,7 @@ app.post('/signup', function (req, res) {
 
 
 // route to authenticate a user (POST http://localhost:8080/api/authenticate)
-apiRoutes.post('/signin', function (req, res) {
+router.post('/signin', function (req, res) {
 
     // find the user
     User.findOne({
@@ -88,7 +95,7 @@ apiRoutes.post('/signin', function (req, res) {
 
 
 // route middleware to verify a token
-apiRoutes.use(function (req, res, next) {
+router.use('/api', function (req, res, next) {
 
     // check header or url parameters or post parameters for token
     var token = req.body.token || req.query.token || req.headers['x-access-token'];
@@ -128,36 +135,36 @@ apiRoutes.use(function (req, res, next) {
 
 
 // route to return all users (GET http://localhost:8080/api/users)
-apiRoutes.get('/users', function (req, res) {
-  User.find({}, function (err, users) {
-    res.json(users);
-  });
+router.get('/api/users', function (req, res) {
+    User.find({}, function (err, users) {
+        res.json(users);
+    });
 });
 
 
 // apply the routes to our application with the prefix /api
-app.use('/api', apiRoutes);
+// app.use('/api', router);
+
+module.exports.router = router;
 
 
+// module.exports = function (app) {
+//     var unagi = require('../controllers/unagiController');
 
+//     // // unagi Routes
+//     // app.route('/api/posts')
+//     //     .get(unagi.list_lazy)
+//     //     .post(unagi.create_a_post);
 
-module.exports = function (app) {
-    var unagi = require('../controllers/unagiController');
+//     // app.route('/api/posts/:postId')
+//     //     .get(unagi.read_a_post)
+//     //     .put(unagi.update_a_post)
+//     //     .delete(unagi.delete_a_post);
 
-    // // unagi Routes
-    // app.route('/api/posts')
-    //     .get(unagi.list_lazy)
-    //     .post(unagi.create_a_post);
+//     // app.route('/api/hot')
+//     //     .get(unagi.list_hot_posts);
 
-    // app.route('/api/posts/:postId')
-    //     .get(unagi.read_a_post)
-    //     .put(unagi.update_a_post)
-    //     .delete(unagi.delete_a_post);
+//     // app.route('/api/posts/activity')
+//     //     .post(unagi.activity);
 
-    // app.route('/api/hot')
-    //     .get(unagi.list_hot_posts);
-
-    // app.route('/api/posts/activity')
-    //     .post(unagi.activity);
-
-};
+// };
