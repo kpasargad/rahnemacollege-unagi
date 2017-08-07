@@ -36,13 +36,26 @@ var PostSchema = new Schema({
     hotness: {
         type: Number,
         default: 0
-    }
+    },
+    parent_id :{
+        type: Schema.Types.ObjectId,
+        ref: 'Posts'
+    },
+    children_id :[{
+        type: Schema.Types.ObjectId,
+        ref: 'Posts'
+    }]
 });
 
+<<<<<<< HEAD
 PostSchema.index({
     "timestamp": -1,
     "location": 1
 });
+=======
+PostSchema.index({"timestamp": -1, "location": 1});
+PostSchema.index({"id" : 1});
+>>>>>>> 76ee907e0ba6536cd3e5409249c64e285b75a15e
 
 var UserSchema = new Schema({
     id: {
@@ -71,6 +84,7 @@ var UserSchema = new Schema({
     //     required: true
     // }
 });
+UserSchema.index({"id" : 1});
 
 var actionsSchema = new Schema({
     userId: {
@@ -93,6 +107,10 @@ var actionsSchema = new Schema({
     }
 });
 
+<<<<<<< HEAD
+=======
+PostSchema.index({"userId" : 1, "like" : 1});
+>>>>>>> 76ee907e0ba6536cd3e5409249c64e285b75a15e
 
 module.exports = {
     posts: mongoose.model('Posts', PostSchema),

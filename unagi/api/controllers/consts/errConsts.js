@@ -15,6 +15,8 @@ const TOKEN_NOT_SENT_ERROR = "No token has been sent to server";
 const ACTION_NOT_SENT_ERROR = "No action request has been sent";
 const ACTION_INVALID_ERROR = "Action is not valid";
 const ACTION_POST_ID_NOT_SENT_ERROR = "No postId is sent in action request";
+const POST_PARENT_ERROR = "An error has occurred while getting the post's parent";
+const POST_PARENT_NOT_EXISTING_ERROR = "The post you are replying to doesn't exist";
 
 module.exports = {
     LIKE_ERROR: LIKE_ERROR,
@@ -33,5 +35,7 @@ module.exports = {
     TOKEN_NOT_SENT_ERROR: TOKEN_NOT_SENT_ERROR,
     ACTION_NOT_SENT_ERROR: ACTION_NOT_SENT_ERROR,
     ACTION_INVALID_ERROR: ACTION_INVALID_ERROR,
-    ACTION_POST_ID_NOT_SENT_ERROR: ACTION_POST_ID_NOT_SENT_ERROR
+    ACTION_POST_ID_NOT_SENT_ERROR: ACTION_POST_ID_NOT_SENT_ERROR,
+    POST_PARENT_ERROR:POST_PARENT_ERROR,
+    POST_PARENT_NOT_EXISTING_ERROR : POST_PARENT_NOT_EXISTING_ERROR
 };
