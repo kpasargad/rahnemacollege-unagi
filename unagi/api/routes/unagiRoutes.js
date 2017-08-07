@@ -9,9 +9,7 @@ module.exports = function (app) {
         .post(unagi.create_a_post);
 
     app.route('/posts/:postId')
-        .get(unagi.read_a_post)
-        .put(unagi.update_a_post)
-        .delete(unagi.delete_a_post);
+        .get(unagi.read_a_post);
 
     app.route('/hot')
         .get(unagi.list_hot_posts);

@@ -17,6 +17,7 @@ var mongoose = require('mongoose'),
     Post = mongoose.model('Posts'),
     Actions = mongoose.model('Actions');
 var send = require('./sendPost').send;
+var send_a_single_post = require('./sendPost').send_a_single_post;
 
 var check_token = require('./tokenCheck').check_token;
 exports.check_token = check_token;
@@ -83,7 +84,7 @@ exports.read_a_post = function (req, res) {
                 if (err) {
                     res.send(err);
                 } else {
-                    send(req, res, post, person);
+                    send_a_single_post(req, res, post, person);
                 }
             });
         } else {

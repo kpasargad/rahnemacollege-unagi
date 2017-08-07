@@ -9,7 +9,9 @@ var hotnessBaseValue = require('./hotController').hotnessBaseValue;
 
 var validator = require('./validators/createPostVal').createPostVal;
 
-var postCreationCallBack = function (req, res, post_with_highest_id, person) {
+var postCreationCallBack = function (req, res, post_with_highest_id, person, parent) {
+    parent_id = (parent === undefined) ? undefined : parent._id;
+    console.log("parent : " + parent);
     var id = 1;
     if (post_with_highest_id === null) {
         //do nothing
@@ -25,7 +27,8 @@ var postCreationCallBack = function (req, res, post_with_highest_id, person) {
         },
         author_id: person.id,
         timestamp: Date.now(),
-        hotness: hotnessBaseValue(Date.now())
+        hotness: hotnessBaseValue(Date.now()),
+        parent_id: parent_id
     });
     console.log("new post:" + new_post);
     new_post.save(function (err, post) {
@@ -34,7 +37,19 @@ var postCreationCallBack = function (req, res, post_with_highest_id, person) {
             res.send(err);
         } else {
             console.log("post is saved.");
-            res.json(post);
+            Post.findOneAndUpdate({_id: parent._id},
+                {$push: {children_id: post._id}},
+                {new: true},
+                function (err, updated_parent) {
+                    if (err) {
+                        res.send(err);
+                    } else {
+                        console.log(updated_parent);
+                        res.send({
+                            success: true
+                        });
+                    }
+                });
         }
     });
 };

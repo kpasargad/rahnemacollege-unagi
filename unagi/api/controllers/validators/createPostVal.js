@@ -6,7 +6,7 @@ var mongoose = require('mongoose'),
 
 var ERR = require('./../consts/errConsts');
 
-exports.createPostVal = function (req, res , person, callback) {
+exports.createPostVal = function (req, res, person, callback) {
     Post.findOne().sort({
         id: -1
     }).exec(function (err, post_with_highest_id) {
@@ -17,10 +17,10 @@ exports.createPostVal = function (req, res , person, callback) {
             res.send({
                 pop_up_error: ERR.LOC_NOT_FOUND_ERROR
             });
-        } else if(isNaN(req.body.Longitude) || isNaN(req.body.Latitude)){
+        } else if (isNaN(req.body.Longitude) || isNaN(req.body.Latitude)) {
             console.log(ERR.LOC_NOT_VALID_ERROR);
             res.send({
-               pop_up_error : ERR.LOC_NOT_VALID_ERROR
+                pop_up_error: ERR.LOC_NOT_VALID_ERROR
             });
         } else if (req.body.text === undefined) {
             console.log(ERR.TEXT_ERROR);
@@ -32,8 +32,26 @@ exports.createPostVal = function (req, res , person, callback) {
             res.send({
                 pop_up_error: ERR.NUMBER_OF_CHARACTERS_ERROR
             });
-        } else{
-            callback(req, res, post_with_highest_id , person);
+        } else {
+            if (req.body.parent_id === undefined) {
+                callback(req, res, post_with_highest_id, person, undefined);
+            } else {
+                Post.findOne({
+                    id : req.body.parent_id
+                }, function (err, parent) {
+                    if(err){
+                        res.send({
+                            pop_up_error : ERR.POST_PARENT_ERROR
+                        })
+                    }else if(parent === null){
+                        res.send({
+                            pop_up_error : ERR.POST_PARENT_NOT_EXISTING_ERROR
+                        })
+                    }else {
+                        callback(req,res, post_with_highest_id, person, parent)
+                    }
+                })
+            }
         }
     });
 };
