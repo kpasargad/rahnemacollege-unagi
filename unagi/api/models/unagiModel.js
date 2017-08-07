@@ -53,7 +53,7 @@ PostSchema.index({"id" : 1});
 var UserSchema = new Schema({
     id: {
         type: Number,
-        // required: true
+        required: true
     },
     name: {
         type: String,

@@ -20,22 +20,38 @@ router.post('/signup', function (req, res) {
     //TODO: Consider Validations
 
     // create a sample user
-    var newUser = new User({
-        name: req.body.name,
-        username: req.body.username,
-        email: req.body.email,
-        password: req.body.password,
-        // UUID: req.body.IMEI
-    });
+    User.findOne().sort({id: -1}).exec(function (err, person) {
+        if (err) {
+            res.send(err);
+            return undefined;
+        }
+        else {
+            var id = 1;
+            if (person === null) {
+                //do nothing
+            } else {
+                id = person.id + 1;
+            }
+            var newUser = new User({
 
-    // save the sample user
-    newUser.save(function (err) {
-        if (err) throw err;
+                id : id,
+                name: req.body.name,
+                username: req.body.username,
+                email: req.body.email,
+                password: req.body.password,
+                // UUID: req.body.IMEI
+            });
 
-        console.log('User saved successfully');
-        res.json({
-            success: true
-        });
+            // save the sample user
+            newUser.save(function (err) {
+                if (err) throw err;
+
+                console.log('User saved successfully');
+                res.json({
+                    success: true
+                });
+            });
+        }
     });
 });
 

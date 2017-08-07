@@ -15,7 +15,7 @@ mongoose.Promise = global.Promise;
 var options = {
   user: 'admin',
   pass: '4KhandRah1'
-}
+};
 
 mongoose.connect(config.database);
 app.set('superSecret', config.secret);

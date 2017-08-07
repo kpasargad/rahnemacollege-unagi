@@ -79,6 +79,7 @@ var check_token = function (req, res, callback) {
             })
         }
         else {
+            console.log("found person " + person);
             callback(person);
         }
     });
