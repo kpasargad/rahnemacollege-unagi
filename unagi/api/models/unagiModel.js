@@ -58,7 +58,7 @@ var UserSchema = new Schema({
         required: true
     }
 });
-UserSchema.index({id : 1});
+UserSchema.index({"id" : 1});
 
 var actionsSchema = new Schema({
     userId: {
