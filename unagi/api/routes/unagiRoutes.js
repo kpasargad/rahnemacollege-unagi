@@ -14,7 +14,7 @@ app.set('superSecret', config.secret);
 
 router.get('/', function (req, res) {
     res.send("Welcome to root");
-})
+});
 
 router.post('/signup', function (req, res) {
 
@@ -114,7 +114,7 @@ router.use('/api', function (req, res, next) {
             } else {
                 // if everything is good, save to request for use in other routes
                 req.decoded = decoded;
-                next();
+                next(req, res);
             }
         });
 
@@ -147,3 +147,5 @@ router.get('/api/hot',unagi.list_hot_posts);
 router.post('/api/posts/activity',unagi.activity);
 
 module.exports.router = router;
+
+module.exports.app = app;

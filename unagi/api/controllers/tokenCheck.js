@@ -3,7 +3,9 @@
 var mongoose = require('mongoose'),
     UserModel = mongoose.model('Users');
 
-var tokenConst = require('./consts/tokenConst');
+var app = require('./../routes/unagiRoutes').app;
+var tokenConst = require('./consts/tokenConst'),
+    jwt = require('jsonwebtoken');
 
 var ERR = require('./consts/errConsts');
 
@@ -38,7 +40,7 @@ var create_a_user = function (req, res, callback) {
 /*returns a new user or the associated existing user.
 * returns undefined in case of error
 * */
-var check_token = function (req, res, callback) {
+var old_check_token = function (req, res, callback) {
     console.log("CHECKING TOKEN");
     console.log(req.query.token);
     if (req.query.token !== undefined) {
@@ -67,5 +69,20 @@ var check_token = function (req, res, callback) {
             pop_up_error: ERR.TOKEN_NOT_SENT_ERROR
         });
     }
+};
+
+var check_token = function(req, res, callback){
+  console.log("fetching user");
+  var decoded = req.decoded;
+  UserModel.findOne({id : decoded.id}, function (err, person) {
+      if(err){
+          res.send({
+              pop_up_error : ERR.USER_ERROR
+          })
+      }
+      else {
+          callback(person);
+      }
+  });
 };
 module.exports.check_token = check_token;
