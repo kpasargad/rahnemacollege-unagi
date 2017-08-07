@@ -100,10 +100,7 @@ var actionsSchema = new Schema({
     }
 });
 
-<<<<<<< HEAD
-=======
 PostSchema.index({"userId" : 1, "like" : 1});
->>>>>>> 76ee907e0ba6536cd3e5409249c64e285b75a15e
 
 module.exports = {
     posts: mongoose.model('Posts', PostSchema),
