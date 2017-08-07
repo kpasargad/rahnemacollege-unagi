@@ -72,7 +72,10 @@ router.post('/signin', function (req, res) {
 
                 // if user is found and password is right
                 // create a token
-                var token = jwt.sign(user, app.get('superSecret'), {
+                var payload={
+                    'id':user.id
+                }
+                var token = jwt.sign(payload, app.get('superSecret'), {
                     expiresIn: 1440 // expires in 24 hours
                 });
 
@@ -86,13 +89,6 @@ router.post('/signin', function (req, res) {
         }
     });
 });
-
-
-
-
-
-
-
 
 
 // route middleware to verify a token
