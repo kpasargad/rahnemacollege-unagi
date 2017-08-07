@@ -1,5 +1,5 @@
 const tokenSize = 32;
-const applyTokenSize = true;
+const applyTokenSize = false;
 
 module.exports = {
     tokenSize : tokenSize,
