@@ -31,24 +31,28 @@ var PostSchema = new Schema({
     },
     number_of_likes: {
         type: Number,
-        default: 0,
+        default: 0
     },
     hotness: {
         type: Number,
         default: 0
     },
-    parent_id :{
+    parent_id: {
         type: Schema.Types.ObjectId,
         ref: 'Posts'
     },
-    children_id :[{
+    children_id: [{
         type: Schema.Types.ObjectId,
         ref: 'Posts'
-    }]
+    }],
+    src_post: {
+        type: Schema.Types.ObjectId,
+        ref: 'Posts'
+    }
 });
 
 PostSchema.index({"timestamp": -1, "location": 1});
-PostSchema.index({"id" : 1});
+PostSchema.index({"id": 1});
 
 var UserSchema = new Schema({
     id: {
@@ -77,15 +81,17 @@ var UserSchema = new Schema({
     //     required: true
     // }
 });
-UserSchema.index({"id" : 1});
+UserSchema.index({"id": 1});
 
 var actionsSchema = new Schema({
-    userId: {
-        type: Number,
+    user_id: {
+        type: Schema.Types.ObjectId,
+        ref: 'Users',
         required: true
     },
-    postId: {
-        type: Number,
+    post_id: {
+        type: Schema.Types.ObjectId,
+        ref: 'Posts',
         required: true
     },
     like: {
@@ -100,7 +106,7 @@ var actionsSchema = new Schema({
     }
 });
 
-PostSchema.index({"userId" : 1, "like" : 1});
+PostSchema.index({"user_id": 1, "like": 1});
 
 module.exports = {
     posts: mongoose.model('Posts', PostSchema),

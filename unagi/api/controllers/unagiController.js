@@ -19,8 +19,8 @@ var mongoose = require('mongoose'),
 var send = require('./sendPost').send;
 var send_a_single_post = require('./sendPost').send_a_single_post;
 
-var check_token = require('./tokenCheck').check_token;
-exports.check_token = check_token;
+var fetch_user = require('./tokenCheck').fetch_user;
+exports.fetch_user = fetch_user;
 
 
 var list_all_posts = function (req, res) {
@@ -32,48 +32,8 @@ var list_all_posts = function (req, res) {
 };
 exports.list_all_posts = list_all_posts;
 
-var list_lazy = function (req, res) {
-    var callback = (function (person) {
-        if (person === undefined) {
-            res.send({
-                pop_up_error: ERR.USER_ERROR
-            });
-        } else {
-            var afterValidationCB = function (req, res, person) {
-                console.log(person);
-                console.log("Someone has requested to see posts " + req.query.latitude + " " + req.query.longitude);
-                let center = [req.query.latitude, req.query.longitude];
-                let lastPost = req.query.lastpost;
-                // var q = post.find({"loc":{"$geoWithin":{"$center":[center, radius]}}}.skip(0).limit(POST_PER_REQ))
-                Post.find({
-                    "timestamp": {
-                        $lt: lastPost
-                    },
-                    "location": {
-                        "$geoWithin": {
-                            "$center": [center, radius]
-                        }
-                    }
-                }, function (err, post) {
-                    if (err) {
-                        console.log("Request is invalid", lastPost);
-                        res.send(err);
-                    } else {
-                        send(req, res, post, person);
-                        try {
-                            console.log("Lastpost : ", post[post.length - 1].timestamp);
-                        } catch (error) {
-                            console.log("There's no post to see.");
-                        }
-                    }
-                }).limit(POST_PER_REQ);
-            };
-            lazyReqValidator(req, res, person, afterValidationCB);
-        }
-    });
-    check_token(req, res, callback);
-};
-exports.list_lazy = list_lazy;
+
+exports.list_lazy = require('./unagiLazyList').list_lazy;
 
 exports.read_a_post = function (req, res) {
     var callback = function (person) {
@@ -93,41 +53,7 @@ exports.read_a_post = function (req, res) {
             })
         }
     };
-    check_token(req, res, callback);
-};
-
-//NOT-USED
-exports.update_a_post = function (req, res) {
-    var callback = function (person) {
-        if (person !== undefined) {
-            Post.findOneAndUpdate({
-                _id: req.query.postId
-            }, req.body, {
-                new: true
-            }, function (err, post) {
-                if (err)
-                    res.send(err);
-                res.json(post);
-            });
-        } else {
-            res.send({
-                pop_up_error: ERR.USER_ERROR
-            })
-        }
-    };
-    check_token(req, res, callback);
-};
-
-exports.delete_a_post = function (req, res) {
-    Post.remove({
-        _id: req.query.postId
-    }, function (err, post) {
-        if (err)
-            res.send(err);
-        res.json({
-            message: 'Post successfully deleted'
-        });
-    });
+    fetch_user(req, res, callback);
 };
 
 exports.list_hot_posts = require('./hotController').list_hot_posts;

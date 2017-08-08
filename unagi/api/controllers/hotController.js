@@ -1,6 +1,6 @@
 'use strict';
 
-var checkToken = require('./tokenCheck').check_token;
+var fetch_user = require('./tokenCheck').fetch_user;
 var send = require('./sendPost').send;
 
 var mongoose = require('mongoose'),
@@ -32,41 +32,40 @@ var hotnessBaseValue = function (date) {
 };
 exports.hotnessBaseValue = hotnessBaseValue;
 
+var show_hot_posts = function (req, res, person) {
+    let latitude = req.query.latitude;
+    let longitude = req.query.longitude;
+    if (latitude === undefined || longitude === undefined) {
+
+    } else if (isNaN(latitude) || isNaN(longitude)) {
+        console.log(ERR.LOC_NOT_VALID_ERROR);
+        res.send({
+            pop_up_error: ERR.LOC_NOT_VALID_ERROR
+        });
+    } else {
+        let center = [latitude, longitude];
+
+        Post.find({
+            "location": {
+                "$geoWithin": {
+                    "$center": [center, radius]
+                }
+            }
+        })
+            .sort({
+                hotness: -1
+            })
+            .limit(10)
+            .exec(function (err, post) {
+                if (err) {
+                    res.send(err);
+                } else {
+                    send(req, res, post, person);
+                }
+            });
+    }
+};
 
 exports.list_hot_posts = function (req, res) {
-
-    var callback = function (person) {
-        let latitude = req.query.latitude;
-        let longitude = req.query.longitude;
-        if (latitude === undefined || longitude === undefined) {
-
-        } else if (isNaN(latitude) || isNaN(longitude)) {
-            console.log(ERR.LOC_NOT_VALID_ERROR);
-            res.send({
-                pop_up_error: ERR.LOC_NOT_VALID_ERROR
-            });
-        } else {
-            let center = [latitude, longitude];
-
-            Post.find({
-                "location": {
-                    "$geoWithin": {
-                        "$center": [center, radius]
-                    }
-                }
-            })
-                .sort({
-                    hotness: -1
-                })
-                .limit(10)
-                .exec(function (err, post) {
-                    if (err) {
-                        res.send(err);
-                    } else {
-                        send(req, res, post, person);
-                    }
-                });
-        }
-    };
-    checkToken(req, res, callback);
+    fetch_user(req, res, show_hot_posts);
 };

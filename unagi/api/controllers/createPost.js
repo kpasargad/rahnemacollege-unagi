@@ -1,4 +1,4 @@
-var check_token = require('./tokenCheck').check_token;
+var fetch_user= require('./tokenCheck').fetch_user;
 
 var ERR = require('./consts/errConsts');
 
@@ -62,19 +62,21 @@ var postCreationCallBack = function (req, res, post_with_highest_id, person, par
     });
 };
 
+var mainCallBack = function (req, res, person) {
+    if (person === undefined) {
+        console.log(ERR.USER_ERROR);
+        res.send({
+            pop_up_error: ERR.USER_ERROR
+        });
+    } else {
+        console.log("CREATE" + person);
+        validator(req, res, person, postCreationCallBack);
+    }
+};
+
 var create_a_post = function (req, res) {
-    var callback = function (person) {
-        if (person === undefined) {
-            console.log(ERR.USER_ERROR);
-            res.send({
-                pop_up_error: ERR.USER_ERROR
-            });
-        } else {
-            console.log("CREATE" + person);
-            validator(req, res, person, postCreationCallBack);
-        }
-    };
-    check_token(req, res, callback);
+
+    fetch_user(req, res, mainCallBack);
 };
 
 exports.create_a_post = create_a_post;

@@ -3,8 +3,13 @@
 const ERR = require('./../consts/errConsts');
 
 var lazyReqValidator = function(req, res, person, callback){
-    if (req.query.latitude !== undefined && req.query.longitude !== undefined && req.query.lastpost !== undefined) {
-        if (!isNaN(req.query.latitude) && !isNaN(req.query.longitude)) {
+    let latitude = req.query.latitude;
+    let longitude = req.query.longitude;
+    console.log("latitude" + latitude);
+    console.log("longitude" + longitude);
+
+    if (latitude !== undefined && longitude !== undefined && req.query.lastpost !== undefined) {
+        if (!isNaN(latitude) && !isNaN(longitude)) {
             if(/^\d+$/.test(req.query.lastpost)){
                 if(req.query.lastpost >= 0){
                     callback(req, res, person);

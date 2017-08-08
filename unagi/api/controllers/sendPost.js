@@ -15,20 +15,21 @@ var mongoose = require('mongoose'),
 var sendPosts = function (req, res, posts, user) {
     //console.log("RAW POSTS:" + posts);
     LikeModel.find({
-        userId: user.id,
+        user_id: user._id,
         like: 1
-    }, function (err, likedPosts) {
+    }).populate('post_id').exec(function (err, likedPosts) {
         if (err) {
             res.send(err);
         }
         else {
             var ids = [...new Set(likedPosts.map(function (item) {
                 if (item !== undefined && item.like === 1) {
-                    return item.postId
+                    return item.post_id.id
                 } else {
                     return undefined;
                 }
             }))];
+            console.log("ids" + ids);
             var sendingPosts = [];
             var length = posts.length;
             if (length === 0) {
@@ -74,7 +75,7 @@ exports.send_a_single_post = function (req, res, focusedPost, user) {
     console.log(focusedPost);
     console.log("Children Ids : " + focusedPost.children_id);
     LikeModel.find({
-        userId: user.id,
+        user_id: user._id,
         like: 1
     }, function (err, likedPosts) {
         if (err) {
@@ -83,7 +84,7 @@ exports.send_a_single_post = function (req, res, focusedPost, user) {
         else {
             var ids = [...new Set(likedPosts.map(function (item) {
                 if (item !== undefined && item.like === 1) {
-                    return item.postId
+                    return item.post_id.id;
                 } else {
                     return undefined;
                 }

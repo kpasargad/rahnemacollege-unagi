@@ -1,7 +1,7 @@
 'use strict';
 
 
-var check_token = require('./tokenCheck').check_token;
+var fetch_user = require('./tokenCheck').fetch_user;
 
 var ERR = require('./consts/errConsts');
 
@@ -14,7 +14,7 @@ var hotness = require('./hotController').hotness;
 var updateCB = function (res, post, person, hotness) {
     console.log("hotness :" + hotness);
     let query = {
-        id: post.id
+        _id: post._id
     };
     Post.findOneAndUpdate(query, {
         $inc: {number_of_likes: -1},
@@ -34,12 +34,10 @@ var updateCB = function (res, post, person, hotness) {
     });
 };
 
-var callbackForLike = function (res, post, person) {
-    let userId = person.id;
-    let postId = post.id;
+var callbackForUnlike = function (res, post, person) {
     let query = {
-        postId: post.id,
-        userId: userId
+        post_id: post._id,
+        user_id: person._id
     };
     Like.findOneAndUpdate(
         query,
@@ -47,68 +45,77 @@ var callbackForLike = function (res, post, person) {
         {upsert: true, new: true},
         function (err, like) {
             if (err) {
-                console.log("User " + userId + " unliked post " + " " + postId + " UNSUCCESSFULLY");
+                console.log("User " + person.id + " unliked post " + " " + post.id + " UNSUCCESSFULLY");
                 res.send({
                     pop_up_error: ERR.LIKE_ERROR
                 })
             } else {
-                console.log("User " + userId + " unliked post " + " " + postId + " SUCCESSFULLY");
-                post.number_of_likes = post.number_of_likes - 1;
+                console.log("User " + person.id + " unliked post " + " " + post.id + " SUCCESSFULLY");
+                post.number_of_likes = post.number_of_likes + 1;
                 hotness(res, post, person, updateCB);
             }
         }
     );
 };
 
-var callbackToFindPost = function (res, postId, person) {
-    let query = {
-        id: postId
-    };
-    Post.findOne(query, function (err, post) {
-        if (err || post === undefined || post === null) {
+var notLiked = function (res, post, person) {
+    Like.findOne({
+        user_id: person._id,
+        post_id: post._id,
+        like: 1
+    }, function (err, like) {
+        if (err) {
+            console.log(ERR.UNLIKE_ERROR);
             res.send({
-                pop_up_error: ERR.POST_NOT_FOUND_ERROR
-            });
-        }
-        else {
-            callbackForLike(res, post, person);
-        }
-    });
-};
-/**
- * This function handles like requests.
- * @param req
- * @param res
- */
-exports.unlike_a_post = function (req, res) {
-    console.log("A request to like a post has been received.");
-    let postId = req.body.postId;
-    var mainCallback = function (person) {
-        if (person === undefined) {
-            console.log(ERR.USER_ERROR);
-            res.send({
-                pop_up_error: ERR.USER_ERROR
-            });
+                pop_up_error: ERR.UNLIKE_ERROR
+            })
+        } else if (like !== null) {
+            callbackForUnlike(res, post, person);
         } else {
-            Like.findOne({
-                'postId': postId,
-                'userId': person.id,
-                'like': 1
-            }, function (err, like) {
-                if (err) {
-                    console.log("Error occurred while finding like query");
-                    res.send(err);
-                } else if (like === null) {
-                    console.log("This user has not liked this post.");
-                    res.send({
-                        pop_up_error: ERR.NOT_LIKED_UNLIKE_ERROR
-                    });
-                } else {
-                    console.log("Unliking the post...");
-                    callbackToFindPost(res, postId, person);
-                }
+            console.log(ERR.NOT_LIKED_UNLIKE_ERROR);
+            res.send({
+                pop_up_error: ERR.NOT_LIKED_UNLIKE_ERROR
             })
         }
-    };
-    check_token(req, res, mainCallback);
+    })
+};
+
+
+/**
+ * This function handles unlike requests.
+ * @param req
+ * @param res
+ * @param person
+ */
+var fetch_post = function (req, res, person) {
+    if (person === undefined) {
+        console.log(ERR.USER_ERROR);
+        res.send({
+            pop_up_error: ERR.USER_ERROR
+        });
+    } else {
+        let postId = req.body.postId;
+        Post.findOne({
+            id: postId,
+        }, function (err, post) {
+            if (err) {
+                console.log(ERR.POST_NOT_FOUND_ERROR);
+                res.send({
+                    pop_up_error: ERR.POST_NOT_FOUND_ERROR
+                })
+            } else if (post === null || post === undefined) {
+                console.log(ERR.POST_NOT_FOUND_ERROR);
+                res.send({
+                    pop_up_error: ERR.POST_NOT_FOUND_ERROR
+                })
+            } else {
+                notLiked(res, post, person)
+            }
+        })
+    }
+};
+
+exports.unlike_a_post = function (req, res) {
+    console.log("A request to like a post has been received.");
+    fetch_user(req, res, fetch_post);
 };
