@@ -9,17 +9,14 @@ var express = require('express'),
     jwt = require('jsonwebtoken');
 
 app.set('superSecret', config.secret);
+var userValidator = require('./../controllers/validators/createUserVal').user_sign_up_val;
 
 
 router.get('/', function (req, res) {
     res.send("Welcome to root");
 });
 
-router.post('/signup', function (req, res) {
-
-    //TODO: Consider Validations
-
-    // create a sample user
+var userCB = function (req, res) {
     User.findOne().sort({id: -1}).exec(function (err, person) {
         if (err) {
             res.send(err);
@@ -34,7 +31,7 @@ router.post('/signup', function (req, res) {
             }
             var newUser = new User({
 
-                id : id,
+                id: id,
                 name: req.body.name,
                 username: req.body.username,
                 email: req.body.email,
@@ -53,6 +50,9 @@ router.post('/signup', function (req, res) {
             });
         }
     });
+};
+router.post('/signup', function (req, res) {
+    userValidator(req,res, userCB)
 });
 
 
