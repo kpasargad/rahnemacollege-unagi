@@ -70,6 +70,45 @@ var sendPosts = function (req, res, posts, user) {
 };
 exports.send = sendPosts;
 
+var addFathersAndSend = function (res, likedIds, main_post, children, fathers) {
+    let current_post = (fathers.length === 0) ? main_post : fathers[fathers.length - 1];
+    if (current_post.parent_id === undefined) {
+        console.log(fathers[fathers.length - 1]);
+        res.send({
+            main_post: main_post,
+            children: children,
+            fathers: fathers
+        });
+    } else {
+        PostModel.findOne({
+                _id: current_post.parent_id
+            },
+            function (err, parent) {
+                if (err) {
+                    res.send(err)
+                } else if (parent === null) {
+                    res.send({
+                        pop_up_error: "An error occurred while fetching fathers"
+                    })
+                } else {
+                    fathers[fathers.length] = {
+                        id: parent.id,
+                        text: parent.text,
+                        author_id: parent.author_id,
+                        location: parent.location,
+                        is_liked: (likedIds.indexOf(parent.id) > -1),
+                        hotness: parent.hotness,
+                        number_of_likes: parent.number_of_likes,
+                        timestamp: parent.timesstamp,
+                        parent_id: parent.parent_id
+                    };
+                    addFathersAndSend(res, likedIds, main_post, children, fathers);
+                }
+            })
+    }
+
+};
+
 exports.send_a_single_post = function (req, res, focusedPost, user) {
     LikeModel.find({
         user_id: user._id,
@@ -87,21 +126,21 @@ exports.send_a_single_post = function (req, res, focusedPost, user) {
                     return undefined;
                 }
             }))];
-            PostModel.findOne({_id: focusedPost._id}).populate('children_id').exec(function (err, focPost) {
-                console.log(focPost);
-                console.log("Children:" + focPost.children_id);
-                let posts = focPost.children_id;
-                let sendingPosts = [];
+            PostModel.find({parent_id: focusedPost._id}).exec(function (err, posts) {
+                console.log(focusedPost);
+                console.log("Children:" + focusedPost.children_id);
+                let children = [];
                 let length = (posts === undefined) ? 0 : posts.length;
                 let focPostToSend = {
-                    id: focPost.id,
-                    text: focPost.text,
-                    author_id: focPost.author_id,
-                    location: focPost.location,
-                    is_liked: (ids.indexOf(focPost.id) > -1),
-                    hotness: focPost.hotness,
-                    number_of_likes: focPost.number_of_likes,
-                    timestamp: focPost.timestamp
+                    id: focusedPost.id,
+                    text: focusedPost.text,
+                    author_id: focusedPost.author_id,
+                    location: focusedPost.location,
+                    is_liked: (ids.indexOf(focusedPost.id) > -1),
+                    hotness: focusedPost.hotness,
+                    number_of_likes: focusedPost.number_of_likes,
+                    timestamp: focusedPost.timestamp,
+                    parent_id : focusedPost.parent_id
                 };
                 if (length === 0) {
                     res.send({
@@ -115,7 +154,7 @@ exports.send_a_single_post = function (req, res, focusedPost, user) {
                         var post = posts[i];
                         console.log("Number Of Likes:" + post.number_of_likes);
                         var postHandler = function (post) {
-                            sendingPosts[donePosts] = ({
+                            children[donePosts] = ({
                                 id: post.id,
                                 text: post.text,
                                 author_id: post.author_id,
@@ -123,17 +162,14 @@ exports.send_a_single_post = function (req, res, focusedPost, user) {
                                 is_liked: (ids.indexOf(post.id) > -1),
                                 hotness: post.hotness,
                                 number_of_likes: post.number_of_likes,
-                                timestamp: post.timestamp
+                                timestamp: post.timesstamp,
+                                parent_id : post.parent_id
                             });
                             donePosts++;
-                            console.log("DONE POSTS:" + donePosts + " " + sendingPosts);
+                            console.log("DONE POSTS:" + donePosts + " " + children);
                             if (donePosts === length) {
-                                console.log("SENDING POSTS...");
-                                console.log(sendingPosts);
-                                res.send({
-                                    main_post: focPostToSend,
-                                    children: sendingPosts
-                                });
+                                let fathers = [];
+                                addFathersAndSend(res, ids, focPostToSend, children, fathers);
                             } else {
                                 console.log(length);
                                 console.log(i + "  " + (length));
