@@ -71,26 +71,23 @@ var sendPosts = function (req, res, posts, user) {
 exports.send = sendPosts;
 
 exports.send_a_single_post = function (req, res, focusedPost, user) {
-    //console.log("RAW POSTS:" + posts);
-    console.log(focusedPost);
-    console.log("Children Ids : " + focusedPost.children_id);
     LikeModel.find({
         user_id: user._id,
         like: 1
-    }, function (err, likedPosts) {
+    }).populate('post_id').exec(function (err, likedPosts) {
         if (err) {
             res.send(err);
         }
         else {
             var ids = [...new Set(likedPosts.map(function (item) {
                 if (item !== undefined && item.like === 1) {
+                    console.log("ITEM:" + item.post_id);
                     return item.post_id.id;
                 } else {
                     return undefined;
                 }
             }))];
-            console.log(ids);
-            PostModel.findOne({_id : focusedPost._id}).populate('children_id').exec(function (err, focPost) {
+            PostModel.findOne({_id: focusedPost._id}).populate('children_id').exec(function (err, focPost) {
                 console.log(focPost);
                 console.log("Children:" + focPost.children_id);
                 let posts = focPost.children_id;
