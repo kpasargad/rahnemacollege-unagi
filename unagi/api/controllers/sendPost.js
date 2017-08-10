@@ -49,7 +49,8 @@ var sendPosts = function (req, res, posts, user) {
                             is_liked: (ids.indexOf(post.id) > -1),
                             hotness: post.hotness,
                             number_of_likes: post.number_of_likes,
-                            timestamp: post.timestamp
+                            timestamp: post.timestamp,
+                            number_of_replies : post.children_id.length
                         });
                         donePosts++;
                         console.log("DONE POSTS:" + donePosts + " " + sendingPosts);
@@ -100,7 +101,8 @@ var addFathersAndSend = function (res, likedIds, main_post, children, fathers) {
                         hotness: parent.hotness,
                         number_of_likes: parent.number_of_likes,
                         timestamp: parent.timesstamp,
-                        parent_id: parent.parent_id
+                        parent_id: parent.parent_id,
+                        number_of_replies : parent.children_id.length
                     };
                     addFathersAndSend(res, likedIds, main_post, children, fathers);
                 }
@@ -140,7 +142,8 @@ exports.send_a_single_post = function (req, res, focusedPost, user) {
                     hotness: focusedPost.hotness,
                     number_of_likes: focusedPost.number_of_likes,
                     timestamp: focusedPost.timestamp,
-                    parent_id : focusedPost.parent_id
+                    parent_id : focusedPost.parent_id,
+                    number_of_replies : focusedPost.children_id.length
                 };
                 if (length === 0) {
                     res.send({
@@ -163,7 +166,8 @@ exports.send_a_single_post = function (req, res, focusedPost, user) {
                                 hotness: post.hotness,
                                 number_of_likes: post.number_of_likes,
                                 timestamp: post.timesstamp,
-                                parent_id : post.parent_id
+                                parent_id : post.parent_id,
+                                number_of_replies : post.children_id.length
                             });
                             donePosts++;
                             console.log("DONE POSTS:" + donePosts + " " + children);
