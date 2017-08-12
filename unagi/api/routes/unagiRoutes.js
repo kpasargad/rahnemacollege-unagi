@@ -22,7 +22,6 @@ router.post("/signup", function(req, res) {
 });
 
 // router.post("/signup", auth.singup);
-
 router.post("/signin", auth.signin, auth.serializeClient);
 
 // route middleware to verify a token
@@ -33,6 +32,10 @@ router.get("/api/users", function(req, res) {
     console.log(users);
     res.json(users);
   });
+});
+
+router.get("/api/checktoken", auth.authenticate, function(req, res) {
+  res.end("I guess this is it.");
 });
 
 router.get("/api/posts", unagi.list_lazy);
