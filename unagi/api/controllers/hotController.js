@@ -35,17 +35,27 @@ exports.hotnessBaseValue = hotnessBaseValue;
 var show_hot_posts = function (req, res, person) {
     let latitude = req.query.latitude;
     let longitude = req.query.longitude;
+    let lastPost = req.query.lasthotness;
     if (latitude === undefined || longitude === undefined) {
-
+        res.send({
+            pop_up_error: ERR.LOC_NOT_FOUND_ERROR
+        })
     } else if (isNaN(latitude) || isNaN(longitude)) {
         console.log(ERR.LOC_NOT_VALID_ERROR);
         res.send({
             pop_up_error: ERR.LOC_NOT_VALID_ERROR
         });
+    } else if (lastPost === undefined) {
+        res.send({
+            pop_up_error: "No last hotness has been sent to server"
+        })
     } else {
         let center = [latitude, longitude];
 
         Post.find({
+            "hotness": {
+                $lt: lastPost
+            },
             "location": {
                 "$geoWithin": {
                     "$center": [center, radius]
