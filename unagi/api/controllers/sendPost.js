@@ -50,7 +50,7 @@ var sendPosts = function (req, res, posts, user) {
                             hotness: post.hotness,
                             number_of_likes: post.number_of_likes,
                             timestamp: post.timestamp,
-                            number_of_replies : post.children_id.length
+                            number_of_replies: post.children_id.length
                         });
                         donePosts++;
                         console.log("DONE POSTS:" + donePosts + " " + sendingPosts);
@@ -83,31 +83,74 @@ var addFathersAndSend = function (res, likedIds, main_post, children, fathers) {
         });
     } else {
         PostModel.findOne({
-                _id: current_post.parent_id
-            },
-            function (err, parent) {
-                if (err) {
-                    res.send(err)
-                } else if (parent === null) {
-                    res.send({
-                        pop_up_error: "An error occurred while fetching fathers"
-                    })
-                } else {
-                    fathers[fathers.length] = {
-                        id: parent.id,
-                        text: parent.text,
-                        author_id: parent.author_id,
-                        location: parent.location,
-                        is_liked: (likedIds.indexOf(parent.id) > -1),
-                        hotness: parent.hotness,
-                        number_of_likes: parent.number_of_likes,
-                        timestamp: parent.timesstamp,
-                        parent_id: parent.parent_id,
-                        number_of_replies : parent.children_id.length
-                    };
-                    addFathersAndSend(res, likedIds, main_post, children, fathers);
-                }
-            })
+            _id: current_post.parent_id
+        }, function (err, parent) {
+            console.log(parent);
+            if (err) {
+                res.send(err)
+            } else if (parent === null) {
+                res.send({
+                    pop_up_error: "An error occurred while fetching fathers"
+                })
+            } else if (parent.parent_id !== undefined) {
+                PostModel.findOne({
+                    _id: parent.parent_id
+                }, function (err, grandParent) {
+                    if (err) {
+                        res.send(err)
+                    } else if (parent === null) {
+                        res.send({
+                            pop_up_error: "An error occurred while fetching fathers"
+                        })
+                    } else {
+                        if (grandParent !== null) {
+                            fathers[fathers.length] = {
+                                id: parent.id,
+                                text: parent.text,
+                                author_id: parent.author_id,
+                                location: parent.location,
+                                is_liked: (likedIds.indexOf(parent.id) > -1),
+                                hotness: parent.hotness,
+                                number_of_likes: parent.number_of_likes,
+                                timestamp: parent.timestamp,
+                                parent_id: grandParent.id,
+                                number_of_replies: (parent.children_id === undefined) ? 0 : parent.children_id.length
+                            };
+                            addFathersAndSend(res, likedIds, main_post, children, fathers);
+                        } else {
+                            fathers[fathers.length] = {
+                                id: parent.id,
+                                text: parent.text,
+                                author_id: parent.author_id,
+                                location: parent.location,
+                                is_liked: (likedIds.indexOf(parent.id) > -1),
+                                hotness: parent.hotness,
+                                number_of_likes: parent.number_of_likes,
+                                timestamp: parent.timestamp,
+                                parent_id: undefined,
+                                number_of_replies: (parent.children_id === undefined) ? 0 : parent.children_id.length
+                            };
+                            addFathersAndSend(res, likedIds, main_post, children, fathers);
+                        }
+                    }
+                });
+
+            }else {
+                fathers[fathers.length] = {
+                    id: parent.id,
+                    text: parent.text,
+                    author_id: parent.author_id,
+                    location: parent.location,
+                    is_liked: (likedIds.indexOf(parent.id) > -1),
+                    hotness: parent.hotness,
+                    number_of_likes: parent.number_of_likes,
+                    timestamp: parent.timestamp,
+                    parent_id: undefined,
+                    number_of_replies: (parent.children_id === undefined) ? 0 : parent.children_id.length
+                };
+                addFathersAndSend(res, likedIds, main_post, children, fathers);
+            }
+        })
     }
 
 };
@@ -143,8 +186,8 @@ exports.send_a_single_post = function (req, res, focusedPost, user) {
                     hotness: focusedPost.hotness,
                     number_of_likes: focusedPost.number_of_likes,
                     timestamp: focusedPost.timestamp,
-                    parent_id : focusedPost.parent_id,
-                    number_of_replies : focusedPost.children_id.length
+                    parent_id: focusedPost.parent_id,
+                    number_of_replies: focusedPost.children_id.length
                 };
                 if (length === 0) {
                     let fathers = [];
@@ -165,8 +208,8 @@ exports.send_a_single_post = function (req, res, focusedPost, user) {
                                 hotness: post.hotness,
                                 number_of_likes: post.number_of_likes,
                                 timestamp: post.timesstamp,
-                                parent_id : post.parent_id,
-                                number_of_replies : post.children_id.length
+                                parent_id: post.parent_id,
+                                number_of_replies: post.children_id.length
                             });
                             donePosts++;
                             console.log("DONE POSTS:" + donePosts + " " + children);
