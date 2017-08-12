@@ -72,6 +72,7 @@ var sendPosts = function (req, res, posts, user) {
 exports.send = sendPosts;
 
 var addFathersAndSend = function (res, likedIds, main_post, children, fathers) {
+    console.log("Fetching Fathers");
     let current_post = (fathers.length === 0) ? main_post : fathers[fathers.length - 1];
     if (current_post.parent_id === undefined) {
         console.log(fathers[fathers.length - 1]);
