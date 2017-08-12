@@ -35,7 +35,10 @@ router.get("/api/users", function(req, res) {
 });
 
 router.get("/api/checktoken", auth.authenticate, function(req, res) {
-  res.end("I guess this is it.");
+  res.status(200).json({
+    success: true,
+    message: "Authentication was successful."
+  });
 });
 
 router.get("/api/posts", unagi.list_lazy);
