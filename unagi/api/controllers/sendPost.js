@@ -146,10 +146,8 @@ exports.send_a_single_post = function (req, res, focusedPost, user) {
                     number_of_replies : focusedPost.children_id.length
                 };
                 if (length === 0) {
-                    res.send({
-                        main_post: focPostToSend,
-                        children: []
-                    });
+                    let fathers = [];
+                    addFathersAndSend(res, ids, focPostToSend, children, fathers);
                 } else {
                     console.log("length: " + length);
                     var donePosts = 0;

@@ -36,6 +36,7 @@ var show_hot_posts = function (req, res, person) {
     let latitude = req.query.latitude;
     let longitude = req.query.longitude;
     let lastPost = req.query.lasthotness;
+
     if (latitude === undefined || longitude === undefined) {
         res.send({
             pop_up_error: ERR.LOC_NOT_FOUND_ERROR
