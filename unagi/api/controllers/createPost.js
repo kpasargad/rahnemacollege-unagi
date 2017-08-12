@@ -35,6 +35,7 @@ var postCreationCallBack = function (req, res, post_with_highest_id, person, par
     console.log("new post:" + new_post);
     new_post.save(function (err, post) {
         if (err) {
+            console.log(err);
             console.log("error in saving the post.");
             res.send(err);
         } else {

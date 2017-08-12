@@ -20,37 +20,38 @@ router.post('/signup', function (req, res) {
     //TODO: Consider Validations
 
     // create a sample user
-    User.findOne().sort({id: -1}).exec(function (err, person) {
+    User.findOne().sort({
+        id: -1
+    }).exec(function (err, person) {
         if (err) {
             res.send(err);
             return undefined;
-        }
-        else {
+        } else {
             var id = 1;
             if (person === null) {
                 //do nothing
             } else {
                 id = person.id + 1;
-            }
-            var newUser = new User({
+                var newUser = new User({
 
-                id : id,
-                name: req.body.name,
-                username: req.body.username,
-                email: req.body.email,
-                password: req.body.password,
-                // UUID: req.body.IMEI
-            });
-
-            // save the sample user
-            newUser.save(function (err) {
-                if (err) throw err;
-
-                console.log('User saved successfully');
-                res.json({
-                    success: true
+                    id: id,
+                    name: req.body.name,
+                    username: req.body.username,
+                    email: req.body.email,
+                    password: req.body.password,
+                    // UUID: req.body.IMEI
                 });
-            });
+
+                // save the sample user
+                newUser.save(function (err) {
+                    if (err) throw err;
+
+                    console.log('User saved successfully');
+                    res.json({
+                        success: true
+                    });
+                });
+            }
         }
     });
 });
@@ -87,10 +88,11 @@ router.post('/signin', function (req, res) {
                     'id': user.id
                 }
                 var token = jwt.sign(payload, app.get('superSecret'), {
-                    expiresIn: 1440 // expires in 24 hours
+                    expiresIn: 60 // expires in 24 hours
                 });
 
                 // return the information including token as JSON
+                console.log(user, token);
                 res.json({
                     success: true,
                     message: 'Enjoy your token!',
