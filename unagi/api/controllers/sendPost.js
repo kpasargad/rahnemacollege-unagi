@@ -3,7 +3,37 @@ var mongoose = require('mongoose'),
     PostModel = mongoose.model('Posts'),
     LikeModel = mongoose.model('Actions');
 
-var setLikesAndSend = function (res, posts, user) {
+var setParentText = function (res, posts) {
+    let length = posts.length;
+    if (length === 0) {
+        res.send([])
+    } else {
+        var donePosts = 0;
+        for (var i = 0; i < length; i++) {
+            var post = posts[i];
+            var postHandler = function (post) {
+                PostModel.find({
+                    _id: post._id
+                }).populate('parent_id').exec(function (err, postWithParent1) {
+                    let postWithParent = postWithParent1[0];
+                    if (err) {
+                        res.send(err);
+                    } else {
+                        post.parent_text = (postWithParent.parent_id === undefined) ? undefined :postWithParent.parent_id.text;
+                        post._id = undefined;
+                        donePosts++;
+                        if (donePosts === length) {
+                            res.send(posts);
+                        }
+                    }
+                });
+            };
+            postHandler(post);
+        }
+    }
+};
+
+var setLikes = function (res, posts, user) {
     let length = posts.length;
     if (length === 0) {
         res.send([])
@@ -21,10 +51,9 @@ var setLikesAndSend = function (res, posts, user) {
                         res.send(err);
                     } else {
                         post.is_liked = (like !== null);
-                        post._id = undefined;
                         donePosts++;
                         if (donePosts === length) {
-                            res.send(posts);
+                            setParentText(res, posts);
                         }
                     }
                 });
@@ -70,7 +99,7 @@ var sendPosts = function (req, res, posts, user) {
                 if (donePosts === length) {
                     console.log("SENDING POSTS...");
                     console.log(sendingPosts);
-                    setLikesAndSend(res, sendingPosts, user);
+                    setLikes(res, sendingPosts, user);
                 }
             };
             postHandler(post);
