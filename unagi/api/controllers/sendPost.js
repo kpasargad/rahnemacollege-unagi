@@ -1,8 +1,38 @@
 'use strict';
 var mongoose = require('mongoose'),
     PostModel = mongoose.model('Posts'),
-    UserModel = mongoose.model('Users'),
     LikeModel = mongoose.model('Actions');
+
+var setLikesAndSend = function (res, posts, user) {
+    let length = posts.length;
+    if (length === 0) {
+        res.send([])
+    } else {
+        var donePosts = 0;
+        for (var i = 0; i < length; i++) {
+            var post = posts[i];
+            var postHandler = function (post) {
+                LikeModel.findOne({
+                    user_id: user._id,
+                    post_id: post._id,
+                    like: 1
+                }, function (err, like) {
+                    if (err) {
+                        res.send(err);
+                    } else {
+                        post.is_liked = (like !== null);
+                        post._id = undefined;
+                        donePosts++;
+                        if (donePosts === length) {
+                            res.send(posts);
+                        }
+                    }
+                });
+            };
+            postHandler(post);
+        }
+    }
+};
 
 /**
  * This function handles to-be-sent posts.
@@ -13,73 +43,51 @@ var mongoose = require('mongoose'),
  * @param user
  */
 var sendPosts = function (req, res, posts, user) {
-    //console.log("RAW POSTS:" + posts);
-    LikeModel.find({
-        user_id: user._id,
-        like: 1
-    }).populate('post_id').exec(function (err, likedPosts) {
-        if (err) {
-            res.send(err);
-        }
-        else {
-            var ids = [...new Set(likedPosts.map(function (item) {
-                if (item !== undefined && item.like === 1) {
-                    return item.post_id.id
-                } else {
-                    return undefined;
+    var sendingPosts = [];
+    var length = posts.length;
+    if (length === 0) {
+        res.send([]);
+    } else {
+        console.log("length: " + length);
+        var donePosts = 0;
+        for (var i = 0; i < length; i++) {
+            var post = posts[i];
+            console.log("Number Of Likes:" + post.number_of_likes);
+            var postHandler = function (post) {
+                sendingPosts[donePosts] = ({
+                    _id: post._id,
+                    id: post.id,
+                    text: post.text,
+                    author_id: post.author_id,
+                    location: post.location,
+                    hotness: post.hotness,
+                    number_of_likes: post.number_of_likes,
+                    timestamp: post.timestamp,
+                    number_of_replies: post.children_id.length
+                });
+                donePosts++;
+                console.log("DONE POSTS:" + donePosts + " " + sendingPosts);
+                if (donePosts === length) {
+                    console.log("SENDING POSTS...");
+                    console.log(sendingPosts);
+                    setLikesAndSend(res, sendingPosts, user);
                 }
-            }))];
-            console.log("ids" + ids);
-            var sendingPosts = [];
-            var length = posts.length;
-            if (length === 0) {
-                res.send([]);
-            } else {
-                console.log("length: " + length);
-                var donePosts = 0;
-                for (var i = 0; i < length; i++) {
-                    var post = posts[i];
-                    console.log("Number Of Likes:" + post.number_of_likes);
-                    var postHandler = function (post) {
-                        sendingPosts[donePosts] = ({
-                            id: post.id,
-                            text: post.text,
-                            author_id: post.author_id,
-                            location: post.location,
-                            is_liked: (ids.indexOf(post.id) > -1),
-                            hotness: post.hotness,
-                            number_of_likes: post.number_of_likes,
-                            timestamp: post.timestamp,
-                            number_of_replies: post.children_id.length
-                        });
-                        donePosts++;
-                        console.log("DONE POSTS:" + donePosts + " " + sendingPosts);
-                        if (donePosts === length) {
-                            console.log("SENDING POSTS...");
-                            console.log(sendingPosts);
-                            res.send(sendingPosts);
-                        } else {
-                            console.log(length);
-                            console.log(i + "  " + (length));
-                        }
-                    };
-                    postHandler(post);
-                }
-            }
+            };
+            postHandler(post);
         }
-    })
+    }
 };
 exports.send = sendPosts;
 
 function sendChildrenAndFathers(res, main_post, children, fathers, user) {
     res.send({
-        main_post : main_post,
+        main_post: main_post,
         children: children,
-        fathers : fathers
+        fathers: fathers
     })
 }
 
-var setLikesOfFathers = function(res, main_post, children, fathers, user) {
+var setLikesOfFathers = function (res, main_post, children, fathers, user) {
     let fathersLength = fathers.length;
     if (fathersLength === 0) {
         sendChildrenAndFathers(res, main_post, children, fathers, user);
@@ -121,7 +129,7 @@ var setLikesOfChildrenAndMainPost = function (res, main_post, children, fathers,
         } else {
             main_post.is_liked = (like !== null);
             main_post._id = undefined;
-            
+
             let childrenLength = children.length;
             if (childrenLength === 0) {
                 setLikesOfFathers(res, main_post, children, fathers, user);
