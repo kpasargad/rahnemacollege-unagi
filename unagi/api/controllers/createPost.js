@@ -1,25 +1,17 @@
-var fetch_user= require('./tokenCheck').fetch_user;
+var fetch_user = require('./tokenCheck').fetch_user;
 
 var ERR = require('./consts/errConsts');
 
 var mongoose = require('mongoose'),
     Post = mongoose.model('Posts'),
-    Actions = mongoose.model('Actions');
+    Actions = mongoose.model('Actions'),
+    Info = mongoose.model('Info');
+
 var hotnessBaseValue = require('./hotController').hotnessBaseValue;
 
 var validator = require('./validators/createPostVal').createPostVal;
 
-var postCreationCallBack = function (req, res, post_with_highest_id, person, parent) {
-    console.log("post creation person :" + person);
-    console.log("post creation parent :" + parent);
-    parent_id = (parent === undefined) ? undefined : parent._id;
-    console.log("parent : " + parent);
-    var id = 1;
-    if (post_with_highest_id === null) {
-        //do nothing
-    } else {
-        id = post_with_highest_id.id + 1;
-    }
+var add_post_to_database = function (req, res, id, person, parent) {
     var new_post = new Post({
         id: id,
         text: req.body.text,
@@ -61,6 +53,45 @@ var postCreationCallBack = function (req, res, post_with_highest_id, person, par
             }
         }
     });
+};
+
+var postCreationCallBack = function (req, res, person, parent) {
+    console.log("post creation person :" + person);
+    console.log("post creation parent :" + parent);
+    parent_id = (parent === undefined) ? undefined : parent._id;
+    console.log("parent : " + parent);
+    Info.findOne({},
+        function (err, info) {
+            if (err) {
+                res.send(err);
+            } else if (info === null) {
+                Info.findOneAndUpdate({},
+                    {$set: {number_of_post_requests: 1000, number_of_user_requests: 1000}},
+                    {upsert: true, new: true},
+                    function (err, info) {
+                        if (err) {
+                            res.send(err);
+                        } else {
+                            let id = info.number_of_post_requests;
+                            add_post_to_database(req, res, id, person, parent);
+                        }
+                    }
+                );
+            } else {
+                Info.findOneAndUpdate({},
+                    {$inc: {number_of_post_requests: 1}},
+                    {upsert: true, new: true},
+                    function (err, info) {
+                        if (err) {
+                            res.send(err);
+                        } else {
+                            let id = info.number_of_post_requests;
+                            add_post_to_database(req, res, id, person, parent);
+                        }
+                    }
+                );
+            }
+        });
 };
 
 var mainCallBack = function (req, res, person) {
