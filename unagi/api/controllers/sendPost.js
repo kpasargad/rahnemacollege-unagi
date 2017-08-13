@@ -121,38 +121,38 @@ var setLikesOfChildrenAndMainPost = function (res, main_post, children, fathers,
         } else {
             main_post.is_liked = (like !== null);
             main_post._id = undefined;
+            
+            let childrenLength = children.length;
+            if (childrenLength === 0) {
+                setLikesOfFathers(res, main_post, children, fathers, user);
+            } else {
+                var doneChildren = 0;
+                for (var i = 0; i < childrenLength; i++) {
+                    var post = children[i];
+                    var postHandler = function (post) {
+                        LikeModel.findOne({
+                            user_id: user._id,
+                            post_id: post._id,
+                            like: 1
+                        }, function (err, like) {
+                            if (err) {
+                                res.send(err);
+                            } else {
+                                console.log("LIKE : " + like);
+                                post.is_liked = (like !== null);
+                                post._id = undefined;
+                                doneChildren++;
+                                if (doneChildren === childrenLength) {
+                                    setLikesOfFathers(res, main_post, children, fathers, user);
+                                }
+                            }
+                        });
+                    };
+                    postHandler(post);
+                }
+            }
         }
     });
-
-    let childrenLength = children.length;
-    if (childrenLength === 0) {
-        setLikesOfFathers(res, main_post, children, fathers, user);
-    } else {
-        var doneChildren = 0;
-        for (var i = 0; i < childrenLength; i++) {
-            var post = children[i];
-            var postHandler = function (post) {
-                LikeModel.findOne({
-                    user_id: user._id,
-                    post_id: post._id,
-                    like: 1
-                }, function (err, like) {
-                    if (err) {
-                        res.send(err);
-                    } else {
-                        console.log("LIKE : " + like);
-                        post.is_liked = (like !== null);
-                        post._id = undefined;
-                        doneChildren++;
-                        if (doneChildren === childrenLength) {
-                            setLikesOfFathers(res, main_post, children, fathers, user);
-                        }
-                    }
-                });
-            };
-            postHandler(post);
-        }
-    }
 };
 
 var addFathers = function (res, main_post, children, fathers, user) {
