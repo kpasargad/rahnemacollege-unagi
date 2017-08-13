@@ -46,6 +46,10 @@ router.get("/api/posts/:postId", unagi.read_a_post);
 
 router.get("/api/hot", unagi.list_hot_posts);
 
+router.get("/api/myposts", unagi.my_posts);
+
+//router.get("api/posts/liked", unagi.liked_posts);
+
 router.post("/api/posts/activity", unagi.activity);
 
 module.exports.router = router;

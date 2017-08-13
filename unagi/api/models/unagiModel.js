@@ -46,15 +46,17 @@ var PostSchema = new Schema({
             ref: "Posts"
         }
     ],
-    src_post: {
-        type: Schema.Types.ObjectId,
-        ref: "Posts"
-    }
+    // src_post: {
+    //     type: Schema.Types.ObjectId,
+    //     ref: "Posts"
+    // }
 });
 
 PostSchema.index({timestamp: -1, location: 1});
 PostSchema.index({id: 1});
 PostSchema.index({parent_id: 1});
+PostSchema.index({author_id: 1, timestamp: -1});
+PostSchema.index({hotness: 1});
 
 var UserSchema = new Schema({
     id: {
@@ -80,6 +82,7 @@ var UserSchema = new Schema({
     }
 });
 UserSchema.index({id: 1});
+UserSchema.index({username: 1});
 
 var actionsSchema = new Schema({
     user_id: {
@@ -104,7 +107,12 @@ var actionsSchema = new Schema({
     }
 });
 
-PostSchema.index({user_id: 1, like: 1});
+actionsSchema.index({user_id: 1, like: 1});
+actionsSchema.index({
+    user_id: 1,
+    post_id: 1,
+    like: 1
+});
 
 var authSchema = new Schema({
     user_id: {
@@ -128,13 +136,13 @@ var authSchema = new Schema({
 var infoSchema = new Schema({
     number_of_user_requests: {
         type: Number,
-        default : 1000,
+        default: 1000,
         required: true
     },
-    number_of_post_requests :{
+    number_of_post_requests: {
         type: Number,
-        default : 1000,
-        required : true
+        default: 1000,
+        required: true
 
     }
 });
@@ -144,5 +152,5 @@ module.exports = {
     users: mongoose.model("Users", UserSchema),
     actions: mongoose.model("Actions", actionsSchema),
     auths: mongoose.model("Auths", authSchema),
-    info : mongoose.model("Info", infoSchema)
+    info: mongoose.model("Info", infoSchema)
 };

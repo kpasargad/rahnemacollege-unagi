@@ -35,9 +35,14 @@ var lazyReqValidator = function(req, res, person, callback){
             pop_up_error: ERR.LOC_NOT_FOUND_ERROR
         });
     } else if (req.query.lastpost === undefined) {
-        console.log("Someone has requested to see posts but has no lastpost.");
+        console.log(ERR.LAST_POST_NOT_FOUND_ERROR);
         res.send({
             pop_up_error: ERR.LAST_POST_NOT_FOUND_ERROR
+        });
+    } else if(isNaN(req.query.lastpost)){
+        console.log(ERR.LAST_POST_NOT_VALID_ERROR);
+        res.send({
+            pop_up_error: ERR.LAST_POST_NOT_VALID_ERROR
         });
     }
 };
