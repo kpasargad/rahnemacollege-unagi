@@ -6,10 +6,11 @@ var express = require("express"),
     User = require("./../models/unagiModel").users,
     config = require("./../../config"),
     unagi = require("./../controllers/unagiController"),
-    auth = require("./../controllers/authController"),
+    auth = require("./../controllers/authentication/authController"),
     jwt = require("jsonwebtoken"),
     userValidator = require("./../controllers/validators/createUserVal")
-        .user_sign_up_val;
+        .user_sign_up_val,
+    auth2 = require("./../controllers/authentication/signin");
 
 app.set("superSecret", config.secret);
 
@@ -23,6 +24,16 @@ router.post("/signup", function(req, res) {
 
 // router.post("/signup", auth.signup);
 router.post("/signin", auth.signin, auth.serializeClient);
+
+router.post(
+    "/signin2",
+    auth2.signin,
+    auth2.serializeClient,
+    auth2.generateAccessToken,
+    auth2.generateRefreshToken,
+    auth2.storeRefreshToken,
+    auth2.respond
+);
 
 // route middleware to verify a token
 router.use("/api", auth.authenticate);
