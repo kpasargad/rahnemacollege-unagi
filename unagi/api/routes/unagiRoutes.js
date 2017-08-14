@@ -21,7 +21,7 @@ router.post("/signup", function(req, res) {
     userValidator(req, res, auth.signup);
 });
 
-// router.post("/signup", auth.singup);
+// router.post("/signup", auth.signup);
 router.post("/signin", auth.signin, auth.serializeClient);
 
 // route middleware to verify a token
