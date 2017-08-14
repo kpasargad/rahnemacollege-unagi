@@ -22,7 +22,7 @@ var add_user_to_database = function(req, res, id) {
         // UUID: req.body.IMEI
     });
 
-    // save the user
+    // save the sample user
     newUser.save(function(err) {
         if (err) throw err;
 
@@ -42,8 +42,9 @@ exports.signup = function(req, res) {
                 {},
                 {
                     $set: {
-                        number_of_post_requests: 1000,
-                        number_of_user_requests: 1000
+                        number_of_actions_requests: 2000,
+                        number_of_user_requests: 2000,
+                        number_of_post_requests: 2000
                     }
                 },
                 { upsert: true, new: true },
