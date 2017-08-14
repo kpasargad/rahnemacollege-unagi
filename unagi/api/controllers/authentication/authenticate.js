@@ -1,11 +1,11 @@
+"use strict";
+
 var express = require("express"),
     app = express(),
     router = express.Router(),
     User = require("./../../models/unagiModel").users,
     Auth = require("./../../models/unagiModel").auths,
     config = require("./../../../config"),
-    unagi = require("./../../controllers/unagiController"),
-    auth = require("./../authentication/authController"),
     jwt = require("jsonwebtoken");
 
 app.set("superSecret", config.secret);

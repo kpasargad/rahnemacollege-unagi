@@ -6,11 +6,12 @@ var express = require("express"),
     User = require("./../models/unagiModel").users,
     config = require("./../../config"),
     unagi = require("./../controllers/unagiController"),
-    auth = require("./../controllers/authentication/authController"),
     jwt = require("jsonwebtoken"),
     userValidator = require("./../controllers/validators/createUserVal")
         .user_sign_up_val,
-    auth2 = require("./../controllers/authentication/signin");
+    signinModule = require("./../controllers/authentication/signin"),
+    signupModule = require("./../controllers/authentication/signup"),
+    authModule = require("./../controllers/authentication/authenticate");
 
 app.set("superSecret", config.secret);
 
@@ -19,24 +20,21 @@ router.get("/", function(req, res) {
 });
 
 router.post("/signup", function(req, res) {
-    userValidator(req, res, auth.signup);
+    userValidator(req, res, signupModule.signup);
 });
 
-// router.post("/signup", auth.signup);
-router.post("/signin", auth.signin, auth.serializeClient);
-
 router.post(
-    "/signin2",
-    auth2.signin,
-    auth2.serializeClient,
-    auth2.generateAccessToken,
-    auth2.generateRefreshToken,
-    auth2.storeRefreshToken,
-    auth2.respond
+    "/signin",
+    signinModule.signin,
+    signinModule.serializeClient,
+    signinModule.generateAccessToken,
+    signinModule.generateRefreshToken,
+    signinModule.storeRefreshToken,
+    signinModule.respond
 );
 
 // route middleware to verify a token
-router.use("/api", auth.authenticate);
+router.use("/api", authModule.authenticate);
 
 router.get("/api/users", function(req, res) {
     User.find({}, function(err, users) {
@@ -45,7 +43,7 @@ router.get("/api/users", function(req, res) {
     });
 });
 
-router.get("/api/checktoken", auth.authenticate, function(req, res) {
+router.get("/api/checktoken", authModule.authenticate, function(req, res) {
     res.status(200).json({
         success: true,
         message: "Authentication was successful."
