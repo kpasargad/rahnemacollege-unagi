@@ -9,8 +9,8 @@ var express = require("express"),
     jwt = require("jsonwebtoken");
 
 app.set("superSecret", config.secret);
-var mongoose = require('mongoose'),
-    Info = mongoose.model('Info');
+var mongoose = require("mongoose"),
+    Info = mongoose.model("Info");
 
 var add_user_to_database = function (req, res, id) {
     var newUser = new User({
@@ -33,18 +33,20 @@ var add_user_to_database = function (req, res, id) {
     });
 };
 
-exports.singup = function (req, res) {
+exports.signup = function (req, res) {
     Info.findOne({},
         function (err, info) {
             if (err) {
                 res.send(err);
             } else if (info === null) {
                 Info.findOneAndUpdate({},
-                    {$set: {
-                        number_of_actions_requests: 2000,
-                        number_of_user_requests: 2000,
-                        number_of_post_requests: 2000
-                    }},
+                    {
+                        $set: {
+                            number_of_actions_requests: 2000,
+                            number_of_user_requests: 2000,
+                            number_of_post_requests: 2000
+                        }
+                    },
                     {upsert: true, new: true},
                     function (err, info) {
                         if (err) {
@@ -56,7 +58,8 @@ exports.singup = function (req, res) {
                     }
                 );
             } else {
-                Info.findOneAndUpdate({},
+                Info.findOneAndUpdate(
+                    {},
                     {$inc: {number_of_user_requests: 1}},
                     {upsert: true, new: true},
                     function (err, info) {
