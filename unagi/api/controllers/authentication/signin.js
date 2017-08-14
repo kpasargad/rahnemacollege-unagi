@@ -66,7 +66,7 @@ exports.serializeClient = function(req, res, next) {
 exports.generateAccessToken = function(req, res, next) {
     // create a token
     var payload = {
-        user_id: req.user.id
+        user_id: req.user.user_id
     };
     var accessToken = jwt.sign(payload, app.get("superSecret"), {
         expiresIn: 60 * 15 //expires in 15 minutes
