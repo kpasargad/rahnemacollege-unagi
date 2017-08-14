@@ -1,24 +1,24 @@
 "use strict";
 
 var express = require("express"),
-  app = express(),
-  router = express.Router(),
-  User = require("./../models/unagiModel").users,
-  config = require("./../../config"),
-  unagi = require("./../controllers/unagiController"),
-  auth = require("./../controllers/authController"),
-  jwt = require("jsonwebtoken"),
-  userValidator = require("./../controllers/validators/createUserVal")
-    .user_sign_up_val;
+    app = express(),
+    router = express.Router(),
+    User = require("./../models/unagiModel").users,
+    config = require("./../../config"),
+    unagi = require("./../controllers/unagiController"),
+    auth = require("./../controllers/authController"),
+    jwt = require("jsonwebtoken"),
+    userValidator = require("./../controllers/validators/createUserVal")
+        .user_sign_up_val;
 
 app.set("superSecret", config.secret);
 
 router.get("/", function(req, res) {
-  res.send("Welcome to root");
+    res.send("Welcome to root");
 });
 
 router.post("/signup", function(req, res) {
-  userValidator(req, res, auth.singup);
+    userValidator(req, res, auth.signup);
 });
 
 // router.post("/signup", auth.singup);
@@ -28,17 +28,17 @@ router.post("/signin", auth.signin, auth.serializeClient);
 router.use("/api", auth.authenticate);
 
 router.get("/api/users", function(req, res) {
-  User.find({}, function(err, users) {
-    console.log(users);
-    res.json(users);
-  });
+    User.find({}, function(err, users) {
+        console.log(users);
+        res.json(users);
+    });
 });
 
 router.get("/api/checktoken", auth.authenticate, function(req, res) {
-  res.status(200).json({
-    success: true,
-    message: "Authentication was successful."
-  });
+    res.status(200).json({
+        success: true,
+        message: "Authentication was successful."
+    });
 });
 
 router.get("/api/posts", unagi.list_lazy);
