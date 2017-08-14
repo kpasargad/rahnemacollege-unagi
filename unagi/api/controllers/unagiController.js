@@ -28,6 +28,7 @@ exports.list_hot_posts = require('./hotController').list_hot_posts;
 exports.create_a_post = require('./createPost').create_a_post;
 exports.read_a_post = require('./singleRead').read_a_post;
 exports.my_posts = require('./myPosts').my_posts;
+exports.my_likes = require('./myLikes').my_likes;
 var like_a_post = require('./like').like_a_post;
 var unlike_a_post = require('./unlike').unlike_a_post;
 

@@ -7,7 +7,8 @@ var ERR = require('./consts/errConsts');
 
 var mongoose = require('mongoose'),
     Post = mongoose.model('Posts'),
-    Like = mongoose.model('Actions');
+    Like = mongoose.model('Actions'),
+    Info = mongoose.model('Info');
 
 var hotness = require('./hotController').hotness;
 
@@ -34,14 +35,15 @@ var updateCB = function (res, post, person, hotness) {
     });
 };
 
-var callbackForLike = function (res, post, person) {
+function add_like_to_database(res, post, id, person) {
     let query = {
         post_id: post._id,
         user_id: person._id
     };
+    let time = Date.now();
     Like.findOneAndUpdate(
         query,
-        {$set: {like: 1}},
+        {$set: {like: 1, timestamp: time, id: id}},
         {upsert: true, new: true},
         function (err, like) {
             if (err) {
@@ -56,6 +58,48 @@ var callbackForLike = function (res, post, person) {
             }
         }
     );
+
+}
+
+var callbackForLike = function (res, post, person) {
+    Info.findOne({},
+        function (err, info) {
+            if (err) {
+                res.send(err);
+            } else if (info === null) {
+                Info.findOneAndUpdate({},
+                    {
+                        $set: {
+                            number_of_actions_requests: 2000,
+                            number_of_user_requests: 2000,
+                            number_of_post_requests: 2000
+                        }
+                    },
+                    {upsert: true, new: true},
+                    function (err, info) {
+                        if (err) {
+                            res.send(err);
+                        } else {
+                            let id = info.number_of_actions_requests;
+                            add_like_to_database(res, post, id, person);
+                        }
+                    }
+                );
+            } else {
+                Info.findOneAndUpdate({},
+                    {$inc: {number_of_actions_requests: 1}},
+                    {upsert: true, new: true},
+                    function (err, info) {
+                        if (err) {
+                            res.send(err);
+                        } else {
+                            let id = info.number_of_actions_requests;
+                            add_like_to_database(res, post, id, person);
+                        }
+                    }
+                );
+            }
+        });
 };
 
 var likeAlreadyExists = function (res, post, person) {

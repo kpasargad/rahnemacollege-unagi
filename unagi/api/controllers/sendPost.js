@@ -51,6 +51,7 @@ var setLikes = function (res, posts, user) {
                         res.send(err);
                     } else {
                         post.is_liked = (like !== null);
+                        post.like_id = (like !== null) ? like.id : undefined;
                         donePosts++;
                         if (donePosts === length) {
                             setParentText(res, posts);
@@ -134,6 +135,7 @@ var setLikesOfFathers = function (res, main_post, children, fathers, user) {
                         res.send(err);
                     } else {
                         post.is_liked = (like !== null);
+                        post.like_id = (like !== null) ? like.id : undefined;
                         post._id = undefined;
                         doneFathers++;
                         if (doneFathers === fathersLength) {
@@ -157,6 +159,7 @@ var setLikesOfChildrenAndMainPost = function (res, main_post, children, fathers,
             res.send(err);
         } else {
             main_post.is_liked = (like !== null);
+            main_post.like_id = (like !== null) ? like.id : undefined;
             main_post._id = undefined;
 
             let childrenLength = children.length;
@@ -177,6 +180,7 @@ var setLikesOfChildrenAndMainPost = function (res, main_post, children, fathers,
                             } else {
                                 console.log("LIKE : " + like);
                                 post.is_liked = (like !== null);
+                                post.like_id = (like !== null) ? like.id : undefined;
                                 post._id = undefined;
                                 doneChildren++;
                                 if (doneChildren === childrenLength) {
