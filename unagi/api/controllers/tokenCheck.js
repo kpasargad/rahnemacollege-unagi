@@ -25,6 +25,12 @@ var fetch_user = function (req, res, callback) {
                 pop_up_error: ERR.USER_ERROR
             })
         }
+        else if (person === null) {
+            console.log("USER NOT FOUND IN FETCH USER SOMETHING IS WRONG");
+            res.send({
+                pop_up_error: "USER NOT FOUND IN FETCH USER SOMETHING IS WRONG"
+            });
+        }
         else {
             console.log("found person " + person);
             callback(req, res, person);
