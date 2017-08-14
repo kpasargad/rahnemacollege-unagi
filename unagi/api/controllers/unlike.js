@@ -51,7 +51,7 @@ var callbackForUnlike = function (res, post, person) {
                 })
             } else {
                 console.log("User " + person.id + " unliked post " + " " + post.id + " SUCCESSFULLY");
-                post.number_of_likes = post.number_of_likes + 1;
+                post.number_of_likes = post.number_of_likes - 1;
                 hotness(res, post, person, updateCB);
             }
         }

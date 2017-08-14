@@ -66,26 +66,30 @@ var postCreationCallBack = function (req, res, person, parent) {
                 res.send(err);
             } else if (info === null) {
                 Info.findOneAndUpdate({},
-                    {$set: {number_of_post_requests: 1000, number_of_user_requests: 1000}},
+                    {$set: {
+                        number_of_actions_requests: 2000,
+                        number_of_user_requests: 2000,
+                        number_of_post_requests: 2000
+                    }},
                     {upsert: true, new: true},
                     function (err, info) {
                         if (err) {
                             res.send(err);
                         } else {
-                            let id = info.number_of_post_requests;
+                            let id = info.number_of_actions_requests;
                             add_post_to_database(req, res, id, person, parent);
                         }
                     }
                 );
             } else {
                 Info.findOneAndUpdate({},
-                    {$inc: {number_of_post_requests: 1}},
+                    {$inc: {number_of_actions_requests: 1}},
                     {upsert: true, new: true},
                     function (err, info) {
                         if (err) {
                             res.send(err);
                         } else {
-                            let id = info.number_of_post_requests;
+                            let id = info.number_of_actions_requests;
                             add_post_to_database(req, res, id, person, parent);
                         }
                     }

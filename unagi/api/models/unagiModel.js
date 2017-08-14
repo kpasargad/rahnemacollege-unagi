@@ -45,7 +45,7 @@ var PostSchema = new Schema({
             type: Schema.Types.ObjectId,
             ref: "Posts"
         }
-    ],
+    ]
     // src_post: {
     //     type: Schema.Types.ObjectId,
     //     ref: "Posts"
@@ -53,9 +53,11 @@ var PostSchema = new Schema({
 });
 
 PostSchema.index({timestamp: -1, location: 1});
+PostSchema.index({id: -1, location: 1});
 PostSchema.index({id: 1});
 PostSchema.index({parent_id: 1});
 PostSchema.index({author_id: 1, timestamp: -1});
+PostSchema.index({author_id: 1, id: -1});
 PostSchema.index({hotness: 1});
 
 var UserSchema = new Schema({
@@ -85,6 +87,10 @@ UserSchema.index({id: 1});
 UserSchema.index({username: 1});
 
 var actionsSchema = new Schema({
+    id: {
+        type: Number,
+        required: true
+    },
     user_id: {
         type: Schema.Types.ObjectId,
         ref: "Users",
@@ -104,6 +110,9 @@ var actionsSchema = new Schema({
         type: Number,
         default: 0,
         required: true
+    }, timestamp: {
+        type: Number,
+        default: Date.now
     }
 });
 
@@ -112,6 +121,12 @@ actionsSchema.index({
     user_id: 1,
     post_id: 1,
     like: 1
+});
+actionsSchema.index({id: 1});
+actionsSchema.index({
+    user_id: 1,
+    like: 1,
+    id: -1
 });
 
 var authSchema = new Schema({
@@ -136,14 +151,18 @@ var authSchema = new Schema({
 var infoSchema = new Schema({
     number_of_user_requests: {
         type: Number,
-        default: 1000,
+        default: 2000,
         required: true
     },
-    number_of_post_requests: {
+    number_of_actions_requests: {
         type: Number,
-        default: 1000,
+        default: 2000,
         required: true
-
+    },
+    number_of_action_requests: {
+        type: Number,
+        default: 2000,
+        required: true
     }
 });
 

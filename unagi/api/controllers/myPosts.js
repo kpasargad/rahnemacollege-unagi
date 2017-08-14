@@ -4,12 +4,6 @@
 //app constants:
 const POST_PER_REQ = require('./consts/appConsts').POST_PER_REQ;
 
-//geographic constants:
-const radius = require('./consts/geoConsts').radius;
-
-//Validators:
-const lazyReqValidator = require("./validators/lazyReqVal").lazyReqValidator;
-
 const ERR = require('./consts/errConsts');
 
 //Other:
@@ -43,10 +37,11 @@ var my_posts = function (req, res) {
             }else {
                 // var q = post.find({"loc":{"$geoWithin":{"$center":[center, radius]}}}.skip(0).limit(POST_PER_REQ))
                 Post.find({
-                    "timestamp": {
+                    "author_id" : person.id,
+                    "id": {
                         $lt: lastPost
-                    },
-                    "author_id" : person.id
+                    }
+
                 }, function (err, post) {
                     if (err) {
                         console.log("Request is invalid", lastPost);
