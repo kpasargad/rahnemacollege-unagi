@@ -65,7 +65,7 @@ exports.signup = function(req, res) {
                         res.send(err);
                     } else {
                         let id = info.number_of_user_requests;
-                        hash.ecrypt(req, res, id, add_user_to_database);
+                        hash.encrypt(req, res, id, add_user_to_database);
                     }
                 }
             );
