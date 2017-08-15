@@ -11,7 +11,8 @@ var express = require("express"),
         .user_sign_up_val,
     signinModule = require("./../controllers/authentication/signin"),
     signupModule = require("./../controllers/authentication/signup"),
-    authModule = require("./../controllers/authentication/authenticate");
+    authModule = require("./../controllers/authentication/authenticate"),
+    signoutModule = require("./../controllers/authentication/signout");
 
 app.set("superSecret", config.secret);
 
@@ -33,8 +34,17 @@ router.post(
     signinModule.respond
 );
 
+router.post("/signout", signoutModule.deleteClient);
+
+router.post(
+    "/getaccesstoken",
+    authModule.authenticateRefreshToken,
+    signinModule.generateAccessToken,
+    signinModule.respond
+);
+
 // route middleware to verify a token
-router.use("/api", authModule.authenticate);
+router.use("/api", authModule.authenticateAccessToken);
 
 router.get("/api/users", function(req, res) {
     User.find({}, function(err, users) {
@@ -43,7 +53,10 @@ router.get("/api/users", function(req, res) {
     });
 });
 
-router.get("/api/checktoken", authModule.authenticate, function(req, res) {
+router.get("/api/checktoken", authModule.authenticateAccessToken, function(
+    req,
+    res
+) {
     res.status(200).json({
         success: true,
         message: "Authentication was successful."
