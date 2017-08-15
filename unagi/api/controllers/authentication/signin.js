@@ -73,7 +73,7 @@ exports.generateAccessToken = function(req, res, next) {
         user_id: req.user.user_id
     };
     var accessToken = jwt.sign(payload, app.get("superSecret"), {
-        expiresIn: 60 * 15 //expires in 15 minutes
+        expiresIn: 60 * 30 //expires in 30 minutes
     });
     console.log(req.user, accessToken);
     req.user.accessToken = accessToken;
