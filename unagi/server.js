@@ -16,7 +16,7 @@ var options = {
     pass: "4KhandRah1"
 };
 
-mongoose.connect(config.database, options);
+mongoose.connect(config.database);
 app.set("superSecret", config.secret);
 
 app.use(
