@@ -15,6 +15,27 @@ var fetch_user = require('./tokenCheck').fetch_user;
 exports.fetch_user = fetch_user;
 
 
+var fetch_like_posts = function(req, res, person, likes) {
+    var post = likes.map(function (item) {
+        return item.post_id
+    });
+    send(req, res, post, person);
+    try {
+        console.log("Lastpost : ", post[post.length - 1].timestamp);
+    } catch (error) {
+        console.log("There's no post to see.");
+    }
+};
+
+var handle_error_and_fetch_like_posts = function(err, req, res, person, likes, lastPost) {
+    if (err) {
+        console.log("Request is invalid", lastPost);
+        res.send(err);
+    } else {
+        fetch_like_posts(req, res, person, likes);
+    }
+};
+
 var my_likes = function (req, res) {
     var callback = (function (req, res, person) {
         if (person === undefined) {
@@ -30,20 +51,7 @@ var my_likes = function (req, res) {
                     "user_id": person._id,
                     "like": 1
                 }).populate('post_id').sort({id: -1}).limit(POST_PER_REQ).exec(function (err, likes) {
-                    var post = likes.map(function (item) {
-                        return item.post_id
-                    });
-                    if (err) {
-                        console.log("Request is invalid", lastPost);
-                        res.send(err);
-                    } else {
-                        send(req, res, post, person);
-                        try {
-                            console.log("Lastpost : ", post[post.length - 1].timestamp);
-                        } catch (error) {
-                            console.log("There's no post to see.");
-                        }
-                    }
+                    handle_error_and_fetch_like_posts(err, req, res, person, likes, lastPost);
                 });
             } else if (isNaN(lastPost)) {
                 res.send({
@@ -57,20 +65,7 @@ var my_likes = function (req, res) {
                         $lt: lastPost
                     }
                 }).populate('post_id').sort({id: -1}).limit(POST_PER_REQ).exec(function (err, likes) {
-                    var post = likes.map(function (item) {
-                        return item.post_id
-                    });
-                    if (err) {
-                        console.log("Request is invalid", lastPost);
-                        res.send(err);
-                    } else {
-                        send(req, res, post, person);
-                        try {
-                            console.log("Lastpost : ", post[post.length - 1].timestamp);
-                        } catch (error) {
-                            console.log("There's no post to see.");
-                        }
-                    }
+                    handle_error_and_fetch_like_posts(err, req, res, person, likes, lastPost);
                 });
             }
         }

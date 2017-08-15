@@ -32,6 +32,14 @@ var hotnessBaseValue = function (date) {
 };
 exports.hotnessBaseValue = hotnessBaseValue;
 
+var handle_error_and_send = function (err, req, res, post, person) {
+    if (err) {
+        res.send(err);
+    } else {
+        send(req, res, post, person);
+    }
+};
+
 var show_hot_posts = function (req, res, person) {
     let latitude = req.query.latitude;
     let longitude = req.query.longitude;
@@ -61,16 +69,12 @@ var show_hot_posts = function (req, res, person) {
                 })
                 .limit(10)
                 .exec(function (err, post) {
-                    if (err) {
-                        res.send(err);
-                    } else {
-                        send(req, res, post, person);
-                    }
+                    handle_error_and_send(err, req, res, post, person);
                 });
         } else {
-            if(isNaN(lastPost)){
+            if (isNaN(lastPost)) {
                 res.send({
-                    pop_up_error:ERR.LAST_POST_NOT_VALID_ERROR
+                    pop_up_error: ERR.LAST_POST_NOT_VALID_ERROR
                 })
             }
             else {
@@ -89,11 +93,7 @@ var show_hot_posts = function (req, res, person) {
                     })
                     .limit(10)
                     .exec(function (err, post) {
-                        if (err) {
-                            res.send(err);
-                        } else {
-                            send(req, res, post, person);
-                        }
+                        handle_error_and_send(err, req, res, post, person);
                     });
             }
         }

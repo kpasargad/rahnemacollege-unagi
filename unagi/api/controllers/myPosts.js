@@ -16,6 +16,25 @@ var fetch_user = require('./tokenCheck').fetch_user;
 exports.fetch_user = fetch_user;
 
 
+var fetch_my_posts = function(req, res, post, person) {
+    send(req, res, post, person);
+    try {
+        console.log("Lastpost : ", post[post.length - 1].timestamp);
+    } catch (error) {
+        console.log("There's no post to see.");
+    }
+};
+
+
+function handle_error_and_my_posts(err, req, res, post, person, lastPost) {
+    if (err) {
+        console.log("Request is invalid", lastPost);
+        res.send(err);
+    } else {
+        fetch_my_posts(req, res, post, person);
+    }
+}
+
 var my_posts = function (req, res) {
     var callback = (function (req, res, person) {
         if (person === undefined) {
@@ -30,17 +49,7 @@ var my_posts = function (req, res) {
                 Post.find({
                     "author_id" : person.id
                 }, function (err, post) {
-                    if (err) {
-                        console.log("Request is invalid", lastPost);
-                        res.send(err);
-                    } else {
-                        send(req, res, post, person);
-                        try {
-                            console.log("Lastpost : ", post[post.length - 1].timestamp);
-                        } catch (error) {
-                            console.log("There's no post to see.");
-                        }
-                    }
+                    handle_error_and_my_posts(err, req, res, post, person, lastPost);
                 }).sort({id: -1}).limit(POST_PER_REQ);
             }else if(isNaN(lastPost)){
                 res.send({
@@ -54,17 +63,7 @@ var my_posts = function (req, res) {
                     }
 
                 }, function (err, post) {
-                    if (err) {
-                        console.log("Request is invalid", lastPost);
-                        res.send(err);
-                    } else {
-                        send(req, res, post, person);
-                        try {
-                            console.log("Lastpost : ", post[post.length - 1].timestamp);
-                        } catch (error) {
-                            console.log("There's no post to see.");
-                        }
-                    }
+                    handle_error_and_my_posts(err, req, res, post, person, lastPost);
                 }).sort({id: -1}).limit(POST_PER_REQ);
             }
         }

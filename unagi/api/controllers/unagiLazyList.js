@@ -22,6 +22,23 @@ var fetch_user = require('./tokenCheck').fetch_user;
 exports.fetch_user = fetch_user;
 
 
+var fetch_lazy_posts = function(req, res, post, person) {
+    send(req, res, post, person);
+    try {
+        console.log("Lastpost : ", post[post.length - 1].timestamp);
+    } catch (error) {
+        console.log("There's no post to see.");
+    }
+};
+
+var handle_error_and_fetch_lazy_posts = function(err, req, res, post, person, lastPost) {
+    if (err) {
+        console.log("Request is invalid", lastPost);
+        res.send(err);
+    } else {
+        fetch_lazy_posts(req, res, post, person);
+    }
+};
 
 var list_lazy = function (req, res) {
     var callback = (function (req, res, person) {
@@ -47,17 +64,7 @@ var list_lazy = function (req, res) {
                             $lt: lastPost
                         }
                     }, function (err, post) {
-                        if (err) {
-                            console.log("Request is invalid", lastPost);
-                            res.send(err);
-                        } else {
-                            send(req, res, post, person);
-                            try {
-                                console.log("Lastpost : ", post[post.length - 1].timestamp);
-                            } catch (error) {
-                                console.log("There's no post to see.");
-                            }
-                        }
+                        handle_error_and_fetch_lazy_posts(err, req, res, post, person, lastPost);
                     }).sort({id : -1}).limit(POST_PER_REQ);
                 }else {
                     Post.find({
@@ -67,17 +74,7 @@ var list_lazy = function (req, res) {
                             }
                         }
                     }, function (err, post) {
-                        if (err) {
-                            console.log("Request is invalid", lastPost);
-                            res.send(err);
-                        } else {
-                            send(req, res, post, person);
-                            try {
-                                console.log("Lastpost : ", post[post.length - 1].timestamp);
-                            } catch (error) {
-                                console.log("There's no post to see.");
-                            }
-                        }
+                        handle_error_and_fetch_lazy_posts(err, req, res, post, person, lastPost);
                     }).sort({id : -1}).limit(POST_PER_REQ);
                 }
             };
