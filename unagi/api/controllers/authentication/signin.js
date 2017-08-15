@@ -65,7 +65,7 @@ exports.serializeClient = function(req, res, next) {
 
 exports.generateAccessToken = function(req, res, next) {
     // create a token
-    if (!req.user) {
+    if (!req.user || req.user === undefined) {
         req.user = {};
         req.user.user_id = req.decoded.user_id;
     }
@@ -73,7 +73,7 @@ exports.generateAccessToken = function(req, res, next) {
         user_id: req.user.user_id
     };
     var accessToken = jwt.sign(payload, app.get("superSecret"), {
-        expiresIn: 60 * 15 //expires in 15 minutes
+        expiresIn: 60 * 30 //expires in 30 minutes
     });
     console.log(req.user, accessToken);
     req.user.accessToken = accessToken;
@@ -82,7 +82,7 @@ exports.generateAccessToken = function(req, res, next) {
 
 exports.generateRefreshToken = function(req, res, next) {
     var payload = {
-        user_id: req.user.id,
+        user_id: req.user.user_id,
         client_id: req.user.client_id
     };
     var refreshToken = jwt.sign(payload, app.get("superSecret"), {

@@ -9,31 +9,33 @@
         - [Activities](#activities)
         - [/api](#api)
     - [Sign Up](#sign-up)
+    - [Get Access Token](#get-access-token)
+    - [Sign Out](#sign-out)
     - [Sign In](#sign-in)
     - [Seeing posts](#seeing-posts)
-        - [General Rules](#general-rules-1)
-        - [`/api/posts`](#apiposts)
+        - [General Rules](#general-rules)
+        - [`/api/posts`](#`apiposts`)
             - [example](#example)
-        - [`/api/hot`](#apihot)
-            - [example](#example-1)
-        - [`/api/myposts`](#apimyposts)
-            - [example](#example-2)
-        - [`/api/mylikes`](#apimylikes)
-            - [example](#example-3)
-        - [`/api/posts/:postId`](#apipostspostid)
-            - [example](#example-4)
+        - [`/api/hot`](#`apihot`)
+            - [example](#example)
+        - [`/api/myposts`](#`apimyposts`)
+            - [example](#example)
+        - [`/api/mylikes`](#`apimylikes`)
+            - [example](#example)
+        - [`/api/posts/:postId`](#`apipostspostid`)
+            - [example](#example)
     - [Posting a post and replying](#posting-a-post-and-replying)
         - [Posting a post](#posting-a-post)
-                - [example](#example-5)
+                - [example](#example)
         - [Replying to a post](#replying-to-a-post)
-            - [example](#example-6)
+            - [example](#example)
     - [Actions on posts](#actions-on-posts)
-                - [example](#example-7)
+                - [example](#example)
     - [Server's answers' rules](#servers-answers-rules)
         - [List of posts](#list-of-posts)
             - [Example](#example)
         - [Accessing a single post](#accessing-a-single-post)
-                - [example](#example-8)
+                - [example](#example)
 
 <!-- /TOC -->
 
@@ -73,6 +75,80 @@ Content-Type: application/json;
 }
 ```
 
+##  Get Access Token
+
+Client is supposed to save the given accessToken and refreshToken. Each request to the URIs starting with /api needs the accessToken to be sent in the header, body or query. If the accessToken expires (currently after 15 mins), client is supposed to send refreshToken in a request like this:
+
+```HTTP
+POST /getaccesstoken?token=refreshToken
+Content-Type: application/json;
+```
+
+Result:
+
+* __Success__
+
+```HTTP
+{
+    "success": true,
+    "message": "Enjoy your tokens!",
+    "accessToken": accessToken
+}
+```
+* __Failure__
+
+If token is invalid:
+```HTTP
+{
+    success: false,
+    token_invalid: true,
+    message: "Failed to authenticate token."
+}
+```
+In case user has logged out:
+```HTTP
+{
+    success: false,
+    message: "User is signed out. You need to login to get a new refresh token."
+                            
+}
+```
+If token is not provided:
+```HTTP
+{
+    success: false,
+    token_invalid: true,
+    message: "No token provided."
+}
+```
+##  Sign Out
+
+A sign out request looks like this:
+
+```HTTP
+POST /signout?token=refreshToken
+Content-Type: application/json;
+```
+
+Result:
+
+* __Success__
+
+```HTTP
+{
+    success: true,
+    message: "User logged out successfully."
+}
+```
+* __Failure__
+
+```HTTP
+{
+    success: false,
+    message: "User not found."
+}
+```
+
 ## Sign In 
 
 A sign in request looks like:
@@ -109,6 +185,7 @@ Result:
     "message": "Authentication failed. Wrong password."
 }
 ```
+
 
 ## Seeing posts
 

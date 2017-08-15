@@ -34,7 +34,11 @@ router.post(
     signinModule.respond
 );
 
-router.post("/signout", signoutModule.deleteClient);
+router.post(
+    "/signout",
+    authModule.authenticateAccessToken,
+    signoutModule.deleteClient
+);
 
 router.post(
     "/getaccesstoken",
