@@ -6,7 +6,8 @@ var express = require("express"),
     User = require("./../../models/unagiModel").users,
     Auth = require("./../../models/unagiModel").auths,
     config = require("./../../../config"),
-    jwt = require("jsonwebtoken");
+    jwt = require("jsonwebtoken"),
+    hash = require("../hash");
 
 app.set("superSecret", config.secret);
 var mongoose = require("mongoose"),
@@ -28,18 +29,22 @@ exports.signin = function(req, res, next) {
                 });
             } else if (user) {
                 // check if password matches
-                if (user.password != req.body.password) {
-                    res.json({
-                        success: false,
-                        message: "Authentication failed. Wrong password."
-                    });
-                } else {
-                    req.user = {};
-                    // if user is found and password is right
-                    req.user.user_id = user.id;
-                    req.user.imei = req.body.imei;
-                    next();
-                }
+                req.body.email = user.email;
+                var checkpassword = function(req, res, id, password) {
+                    if (user.password != password) {
+                        res.json({
+                            success: false,
+                            message: "Authentication failed. Wrong password."
+                        });
+                    } else {
+                        req.user = {};
+                        // if user is found and password is right
+                        req.user.user_id = user.id;
+                        req.user.imei = req.body.imei;
+                        next();
+                    }
+                };
+                hash.encrypt(req, res, user.id, checkpassword);
             }
         }
     );
