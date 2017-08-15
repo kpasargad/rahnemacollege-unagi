@@ -12,6 +12,23 @@ app.set("superSecret", config.secret);
 var mongoose = require("mongoose"),
     Info = mongoose.model("Info");
 
+exports.deleteClient = function(req, res, next) {
+    Auth.findOneAndRemove({ _id: req.body.client_id }, function(err, client) {
+        if (err) throw err;
+        if (!client) {
+            res.json({
+                success: false,
+                message: "User not found."
+            });
+        } else {
+            res.json({
+                success: true,
+                message: "User logged out successfully."
+            });
+        }
+    });
+};
+
 exports.signin = function(req, res, next) {
     // find the user
     User.findOne(
@@ -65,10 +82,6 @@ exports.serializeClient = function(req, res, next) {
 
 exports.generateAccessToken = function(req, res, next) {
     // create a token
-    if (!req.user) {
-        req.user = {};
-        req.user.user_id = req.decoded.user_id;
-    }
     var payload = {
         user_id: req.user.user_id
     };
