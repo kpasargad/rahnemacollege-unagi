@@ -58,7 +58,7 @@ var list_lazy = function (req, res) {
                                 console.log("There's no post to see.");
                             }
                         }
-                    }).limit(POST_PER_REQ);
+                    }).sort({id : -1}).limit(POST_PER_REQ);
                 }else {
                     Post.find({
                         "location": {
@@ -78,7 +78,7 @@ var list_lazy = function (req, res) {
                                 console.log("There's no post to see.");
                             }
                         }
-                    }).limit(POST_PER_REQ);
+                    }).sort({id : -1}).limit(POST_PER_REQ);
                 }
             };
             lazyReqValidator(req, res, person, afterValidationCB);
