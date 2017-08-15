@@ -9,8 +9,8 @@
         - [Activities](#activities)
         - [/api](#api)
     - [Sign Up](#sign-up)
-- [I HAVE NO IDEA](#i-have-no-idea)
     - [Get Access Token](#get-access-token)
+    - [Sign Out](#sign-out)
     - [Sign In](#sign-in)
     - [Seeing posts](#seeing-posts)
         - [General Rules](#general-rules)
@@ -74,21 +74,14 @@ Content-Type: application/json;
 	"name" : name
 }
 ```
-# I HAVE NO IDEA
 
 ##  Get Access Token
 
-Client is supposed to save the given accessToken and refreshToken. Each request to the URIs starting with /api needs the accessToken to be sent in the header, body or query.
+Client is supposed to save the given accessToken and refreshToken. Each request to the URIs starting with /api needs the accessToken to be sent in the header, body or query. If the accessToken expires (currently after 15 mins), client is supposed to send refreshToken in a request like this:
 
 ```HTTP
-POST /signin
+POST /getaccesstoken?token=refreshToken
 Content-Type: application/json;
-
-{
-	"username" : username,
-	"password" : password,
-	"imei" : imei
-}
 ```
 
 Result:
@@ -99,19 +92,63 @@ Result:
 {
     "success": true,
     "message": "Enjoy your tokens!",
-    "client_id": client_id,
-    "refreshToken": refreshToken,
     "accessToken": accessToken
-    }
+}
+```
+* __Failure__
+
+If token is invalid:
+```HTTP
+{
+    success: false,
+    token_invalid: true,
+    message: "Failed to authenticate token."
+}
+```
+In case user has logged out:
+```HTTP
+{
+    success: false,
+    message: "User is signed out. You need to login to get a new refresh token."
+                            
+}
+```
+If token is not provided:
+```HTTP
+{
+    success: false,
+    token_invalid: true,
+    message: "No token provided."
+}
+```
+##  Sign Out
+
+A sign out request looks like this:
+
+```HTTP
+POST /signout?token=refreshToken
+Content-Type: application/json;
+```
+
+Result:
+
+* __Success__
+
+```HTTP
+{
+    success: true,
+    message: "User logged out successfully."
+}
 ```
 * __Failure__
 
 ```HTTP
 {
-    "success": false,
-    "message": "Authentication failed. Wrong password."
+    success: false,
+    message: "User not found."
 }
 ```
+
 ## Sign In 
 
 A sign in request looks like:

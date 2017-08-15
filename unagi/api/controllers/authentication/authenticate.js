@@ -31,13 +31,14 @@ exports.authenticateRefreshToken = function(req, res, next) {
                 Auth.findOne({ _id: decoded.client_id }, function(err, client) {
                     if (err) throw err;
                     if (!client) {
-                        return res.status(403).json(
-                            {
+                        return res
+                            .status(403)
+                            .json({
                                 success: false,
                                 message:
                                     "User is signed out. You need to login to get a new refresh token."
-                            }.end()
-                        );
+                            })
+                            .end();
                     } else {
                         // if everything is good, save to request for use in other routes
                         req.decoded = decoded;

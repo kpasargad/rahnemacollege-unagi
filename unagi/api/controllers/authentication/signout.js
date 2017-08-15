@@ -12,19 +12,27 @@ app.set("superSecret", config.secret);
 var mongoose = require("mongoose"),
     Info = mongoose.model("Info");
 
-exports.deleteClient = function(req, res, next) {
-    Auth.findOneAndRemove({ _id: req.body.client_id }, function(err, client) {
+exports.deleteClient = function(req, res) {
+    Auth.findOneAndRemove({ _id: req.decoded.client_id }, function(
+        err,
+        client
+    ) {
         if (err) throw err;
         if (!client) {
-            res.json({
-                success: false,
-                message: "User not found."
-            });
+            console.log("^^^", client, req.decoded);
+            res
+                .json({
+                    success: false,
+                    message: "User not found."
+                })
+                .end();
         } else {
-            res.json({
-                success: true,
-                message: "User logged out successfully."
-            });
+            res
+                .json({
+                    success: true,
+                    message: "User logged out successfully."
+                })
+                .end();
         }
     });
 };
