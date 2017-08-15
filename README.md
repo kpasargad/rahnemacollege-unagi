@@ -1,5 +1,42 @@
 # Team One
 
+<!-- TOC -->
+
+- [Team One](#team-one)
+    - [Server API](#server-api)
+    - [General Rules](#general-rules)
+        - [Requests format](#requests-format)
+        - [Activities](#activities)
+        - [/api](#api)
+    - [Sign Up](#sign-up)
+    - [Sign In](#sign-in)
+    - [Seeing posts](#seeing-posts)
+        - [General Rules](#general-rules-1)
+        - [`/api/posts`](#apiposts)
+            - [example](#example)
+        - [`/api/hot`](#apihot)
+            - [example](#example-1)
+        - [`/api/myposts`](#apimyposts)
+            - [example](#example-2)
+        - [`/api/mylikes`](#apimylikes)
+            - [example](#example-3)
+        - [`/api/posts/:postId`](#apipostspostid)
+            - [example](#example-4)
+    - [Posting a post and replying](#posting-a-post-and-replying)
+        - [Posting a post](#posting-a-post)
+                - [example](#example-5)
+        - [Replying to a post](#replying-to-a-post)
+            - [example](#example-6)
+    - [Actions on posts](#actions-on-posts)
+                - [example](#example-7)
+    - [Server's answers' rules](#servers-answers-rules)
+        - [List of posts](#list-of-posts)
+            - [Example](#example)
+        - [Accessing a single post](#accessing-a-single-post)
+                - [example](#example-8)
+
+<!-- /TOC -->
+
 ## Server API
 
 ## General Rules
@@ -81,6 +118,7 @@ There are several urls that the user can request to, to see the posts
 * `/api/hot`
 * `/api/myposts`
 * `/api/mylikes`
+* `/api/posts/:postId`
 
 In each request 20 posts are sent.
 
@@ -146,6 +184,16 @@ If there is no `lastlikeid` provided the server will send the latest posts.
 GET /api/mylikes?token=yourtoken&lastpost=12
 ```
 
+### `/api/posts/:postId`
+
+This method is used to see a post and all of it's parents and it's direct children.
+
+#### example
+
+```HTTP
+GET /api/posts/12?token=yourtoken
+```
+
 ## Posting a post and replying
 
 ### Posting a post
@@ -167,19 +215,37 @@ Content-Type: application/json;
 
 ### Replying to a post
 
+When the device wants to send a reply post to another post the `parent_id` field has to be filled.
 
+#### example
 
+```HTTP
+POST /posts
+Content-Type: application/json;
 
+{
+	"text" : "Hello Server",
+	"Latitude" : 80.1232,
+	"Longitude" : 12.13453,
+	"parent_id" : 12
+}
+```
 
 
 ## Actions on posts
 
 The client has to send a POST request to `/posts/activity` with `token` as it's header and send the `ActionType` and `postId` in body.
 
+Available actions:
+
+* like
+* unlike
+
 ##### example
 
-```javascript
-POST:localhost:3000/posts/activity?token=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+```HTTP
+POST /posts/activity
+Content-Type: application/json;
 
 {
 	"action" : "like",
@@ -187,18 +253,24 @@ POST:localhost:3000/posts/activity?token=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 }
 ```
 
+```HTTP
+POST /posts/activity
+Content-Type: application/json;
+
+{
+	"action" : "unlike",
+	"postId" : "1"
+}
+```
+
 ## Server's answers' rules
 
-### Result posts:
+Each post consists of the following fields:
 
-The results are sent in an array of posts, and each post consists of the following fields:
 
-* `id : Number`
-
-* `text : String`
-
-* `author_id : Number`
-
+* `id: Number`
+* `text: String`
+* `author_id: Number`
 * `location: {
             coordinates: [
                 Latitude,
@@ -206,42 +278,195 @@ The results are sent in an array of posts, and each post consists of the followi
             ],
             type: "Point"
         }`
+* `is_liked: Boolean`
+* `like_id: Number` (If the post is liked) 
+* `number_of_likes: Number`
+* `parent_id` (If exists)
+* `parent_text: String` (If exists)
+* `number_of_replies: Number`
+* `hotness: Number`
+* `timestamp: Number`
 
-* `is_liked : Boolean`
 
-* `number_of_likes : number`
+### List of posts
+
+The results are sent in an array of posts.
 
 #### Example
 
-```javascript
+
+```HTTP
 [
     {
-        "id": 8,
-        "text": "Hello another user",
-        "author_id": 2,
-        "location": {
-            "coordinates": [
-                50.00,
-                50.00
-            ],
-            "type": "Point"
-        },
-        "is_liked": false,
-        "number_of_likes": 0
-    },
-    {
-        "id": 9,
-        "text": "Hello Server",
+        "id": 1007,
+        "text": "salamh",
         "author_id": 1,
         "location": {
             "coordinates": [
-                12.13,
-                13.213
+                35,
+                50
             ],
             "type": "Point"
         },
+        "hotness": 8191.5961221,
+        "number_of_likes": 2,
+        "timestamp": 1502636282144,
+        "number_of_replies": 0,
         "is_liked": true,
-        "number_of_likes": 1
+        "like_id": 2005,
+        "parent_text": "salamh"
+    },
+    {
+        "id": 1008,
+        "text": "salamh",
+        "author_id": 1,
+        "location": {
+            "coordinates": [
+                35,
+                50
+            ],
+            "type": "Point"
+        },
+        "hotness": 8191.2951058,
+        "number_of_likes": 0,
+        "timestamp": 1502636282762,
+        "number_of_replies": 0,
+        "is_liked": false,
+        "parent_text": "salamh"
+    },
+    {
+        "id": 1006,
+        "text": "salamh",
+        "author_id": 1,
+        "location": {
+            "coordinates": [
+                35,
+                50
+            ],
+            "type": "Point"
+        },
+        "hotness": 8191.2950836,
+        "number_of_likes": 0,
+        "timestamp": 1502636281761,
+        "number_of_replies": 0,
+        "is_liked": false,
+        "parent_text": "salamh"
     }
+    .
+    .
+    .
 ]
+```
+
+### Accessing a single post
+
+The Server's result has the following fields:
+
+* `main_post`: a single post
+* `children`: array of posts
+* `fathers`: array of posts
+
+These posts do not have `parent_text` field since.
+
+##### example
+```HTTP
+{
+    "main_post": {
+        "id": 23,
+        "text": "salamh",
+        "author_id": 1,
+        "location": {
+            "coordinates": [
+                35,
+                50
+            ],
+            "type": "Point"
+        },
+        "hotness": 8189.365409,
+        "number_of_likes": 1,
+        "timestamp": 1502549446403,
+        "parent_id": 1,
+        "number_of_replies": 20,
+        "is_liked": false
+    },
+    "children": [
+        {
+            "id": 24,
+            "text": "salamh",
+            "author_id": 1,
+            "location": {
+                "coordinates": [
+                    35,
+                    50
+                ],
+                "type": "Point"
+            },
+            "hotness": 8189.8430496,
+            "number_of_likes": 3,
+            "timestamp": 1502549469776,
+            "parent_id": 23,
+            "number_of_replies": 0,
+            "is_liked": false
+        },
+        {
+            "id": 25,
+            "text": "salamh",
+            "author_id": 1,
+            "location": {
+                "coordinates": [
+                    35,
+                    50
+                ],
+                "type": "Point"
+            },
+            "hotness": 8189.3659442,
+            "number_of_likes": 0,
+            "timestamp": 1502549470488,
+            "parent_id": 23,
+            "number_of_replies": 0,
+            "is_liked": false
+        },
+        {
+            "id": 26,
+            "text": "salamh",
+            "author_id": 1,
+            "location": {
+                "coordinates": [
+                    35,
+                    50
+                ],
+                "type": "Point"
+            },
+            "hotness": 8189.3659589,
+            "number_of_likes": 0,
+            "timestamp": 1502549471152,
+            "parent_id": 23,
+            "number_of_replies": 0,
+            "is_liked": false
+        }
+        .
+        .
+        .
+    ],
+    "fathers": [
+        {
+            "id": 1,
+            "text": "salamh",
+            "author_id": 1,
+            "location": {
+                "coordinates": [
+                    35,
+                    50
+                ],
+                "type": "Point"
+            },
+            "hotness": 8189.3646053,
+            "number_of_likes": 1,
+            "timestamp": 1502549410237,
+            "number_of_replies": 4,
+            "is_liked": false
+        }
+    ]
+}
+
 ```
