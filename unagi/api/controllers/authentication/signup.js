@@ -6,7 +6,8 @@ var express = require("express"),
     User = require("./../../models/unagiModel").users,
     Auth = require("./../../models/unagiModel").auths,
     config = require("./../../../config"),
-    jwt = require("jsonwebtoken");
+    jwt = require("jsonwebtoken"),
+    hash = require("../hash");
 
 app.set("superSecret", config.secret);
 var mongoose = require("mongoose"),
@@ -18,14 +19,14 @@ var mongoose = require("mongoose"),
  * @param res
  * @param id
  */
-var add_user_to_database = function(req, res, id) {
+
+var add_user_to_database = function(req, res, id, password) {
     var newUser = new User({
         id: id,
         name: req.body.name,
         username: req.body.username,
         email: req.body.email,
-        password: req.body.password
-        // UUID: req.body.IMEI
+        password: password
     });
 
     // save the sample user
@@ -64,7 +65,7 @@ exports.signup = function(req, res) {
                         res.send(err);
                     } else {
                         let id = info.number_of_user_requests;
-                        add_user_to_database(req, res, id);
+                        hash.ecrypt(req, res, id, add_user_to_database);
                     }
                 }
             );
@@ -78,7 +79,7 @@ exports.signup = function(req, res) {
                         res.send(err);
                     } else {
                         let id = info.number_of_user_requests;
-                        add_user_to_database(req, res, id);
+                        hash.encrypt(req, res, id, add_user_to_database);
                     }
                 }
             );
