@@ -12,6 +12,12 @@ app.set("superSecret", config.secret);
 var mongoose = require("mongoose"),
     Info = mongoose.model("Info");
 
+/**
+ * This function is used to add users to the database
+ * @param req
+ * @param res
+ * @param id
+ */
 var add_user_to_database = function(req, res, id) {
     var newUser = new User({
         id: id,
@@ -33,6 +39,11 @@ var add_user_to_database = function(req, res, id) {
     });
 };
 
+/**
+ * This function handles sign-up requests
+ * @param req
+ * @param res
+ */
 exports.signup = function(req, res) {
     Info.findOne({}, function(err, info) {
         if (err) {

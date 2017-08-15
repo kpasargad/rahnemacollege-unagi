@@ -40,6 +40,11 @@ var handle_error_and_fetch_lazy_posts = function(err, req, res, post, person, la
     }
 };
 
+/**
+ * This function handles showing recently posted posts nearby
+ * @param req
+ * @param res
+ */
 var list_lazy = function (req, res) {
     var callback = (function (req, res, person) {
         if (person === undefined) {

@@ -3,6 +3,12 @@ var mongoose = require('mongoose'),
     PostModel = mongoose.model('Posts'),
     LikeModel = mongoose.model('Actions');
 
+
+/**
+ * This function adds the parent_text to every post in array of posts
+ * @param res
+ * @param posts
+ */
 var setParentText = function (res, posts) {
     let length = posts.length;
     if (length === 0) {
@@ -33,6 +39,12 @@ var setParentText = function (res, posts) {
     }
 };
 
+/**
+ * This function sets the likes of an array of posts
+ * @param res
+ * @param posts
+ * @param user
+ */
 var setLikes = function (res, posts, user) {
     let length = posts.length;
     if (length === 0) {
@@ -109,7 +121,14 @@ var sendPosts = function (req, res, posts, user) {
 };
 exports.send = sendPosts;
 
-function sendChildrenAndFathers(res, main_post, children, fathers, user) {
+/**
+ * This function is used to send the fields of a reading single post request
+ * @param res
+ * @param main_post
+ * @param children
+ * @param fathers
+ */
+function sendChildrenAndFathers(res, main_post, children, fathers) {
     res.send({
         main_post: main_post,
         children: children,
@@ -117,10 +136,18 @@ function sendChildrenAndFathers(res, main_post, children, fathers, user) {
     })
 }
 
+/**
+ * This function adds the likes of fathers
+ * @param res
+ * @param main_post
+ * @param children
+ * @param fathers
+ * @param user
+ */
 var setLikesOfFathers = function (res, main_post, children, fathers, user) {
     let fathersLength = fathers.length;
     if (fathersLength === 0) {
-        sendChildrenAndFathers(res, main_post, children, fathers, user);
+        sendChildrenAndFathers(res, main_post, children, fathers);
     } else {
         var doneFathers = 0;
         for (var i = 0; i < fathersLength; i++) {
@@ -139,7 +166,7 @@ var setLikesOfFathers = function (res, main_post, children, fathers, user) {
                         post._id = undefined;
                         doneFathers++;
                         if (doneFathers === fathersLength) {
-                            sendChildrenAndFathers(res, main_post, children, fathers, user);
+                            sendChildrenAndFathers(res, main_post, children, fathers);
                         }
                     }
                 });
@@ -149,6 +176,14 @@ var setLikesOfFathers = function (res, main_post, children, fathers, user) {
     }
 };
 
+/**
+ * This function adds likes of children posts
+ * @param res
+ * @param main_post
+ * @param children
+ * @param fathers
+ * @param user
+ */
 var setLikesOfChildrenAndMainPost = function (res, main_post, children, fathers, user) {
     LikeModel.findOne({
         user_id: user._id,
@@ -195,6 +230,15 @@ var setLikesOfChildrenAndMainPost = function (res, main_post, children, fathers,
         }
     });
 };
+
+/**
+ * This recursive function finds all fathers of the post.
+ * @param res
+ * @param main_post
+ * @param children
+ * @param fathers
+ * @param user
+ */
 
 var addFathers = function (res, main_post, children, fathers, user) {
     console.log("Fetching Fathers");
@@ -277,6 +321,14 @@ var addFathers = function (res, main_post, children, fathers, user) {
 
 };
 
+/**
+ * This function finds the children of the post the user wants to see
+ * @param res
+ * @param main_post
+ * @param childrenPosts
+ * @param user
+ * @param addFathersAndSend
+ */
 var addChildren = function (res, main_post, childrenPosts, user, addFathersAndSend) {
     let children = [];
     let length = (childrenPosts === undefined) ? 0 : childrenPosts.length;
@@ -317,6 +369,13 @@ var addChildren = function (res, main_post, childrenPosts, user, addFathersAndSe
     }
 };
 
+/**
+ * This function finds the post the user wants to see
+ * @param req
+ * @param res
+ * @param mainPost
+ * @param user
+ */
 exports.send_a_single_post = function (req, res, mainPost, user) {
     PostModel.find({
         _id: mainPost._id

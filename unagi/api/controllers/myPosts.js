@@ -33,8 +33,14 @@ var handle_error_and_my_posts = function(err, req, res, post, person, lastPost) 
     } else {
         fetch_my_posts(req, res, post, person);
     }
-}
+};
 
+
+/**
+ * This function handles show my post requests
+ * @param req
+ * @param res
+ */
 var my_posts = function (req, res) {
     var callback = (function (req, res, person) {
         if (person === undefined) {

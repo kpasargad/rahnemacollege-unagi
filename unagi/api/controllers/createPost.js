@@ -11,6 +11,14 @@ var hotnessBaseValue = require('./hotController').hotnessBaseValue;
 
 var validator = require('./validators/createPostVal').createPostVal;
 
+/**
+ * This function adds the post to the database
+ * @param req
+ * @param res
+ * @param id
+ * @param person
+ * @param parent
+ */
 var add_post_to_database = function (req, res, id, person, parent) {
     var new_post = new Post({
         id: id,
@@ -55,6 +63,13 @@ var add_post_to_database = function (req, res, id, person, parent) {
     });
 };
 
+/**
+ * This function fetches the id of the post
+ * @param req
+ * @param res
+ * @param person
+ * @param parent
+ */
 var postCreationCallBack = function (req, res, person, parent) {
     console.log("post creation person :" + person);
     console.log("post creation parent :" + parent);
@@ -98,6 +113,12 @@ var postCreationCallBack = function (req, res, person, parent) {
         });
 };
 
+/**
+ * This is the main function to handle post creation requests and checks whether the user exists or not
+ * @param req
+ * @param res
+ * @param person
+ */
 var mainCallBack = function (req, res, person) {
     if (person === undefined) {
         console.log(ERR.USER_ERROR);

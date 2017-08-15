@@ -10,7 +10,12 @@ var mongoose = require('mongoose'),
 var fetch_user = require('./tokenCheck').fetch_user;
 exports.fetch_user = fetch_user;
 
-
+/**
+ * This function gives all of the posts in json
+ * It shouldn't be used in the final version
+ * @param req
+ * @param res
+ */
 var list_all_posts = function (req, res) {
     Post.find({}, function (err, post) {
         if (err)
@@ -32,6 +37,12 @@ exports.my_likes = require('./myLikes').my_likes;
 var like_a_post = require('./like').like_a_post;
 var unlike_a_post = require('./unlike').unlike_a_post;
 
+
+/**
+ * This function handles and selects the requested activity (like / unlike) and navigates them to their associated function
+ * @param req
+ * @param res
+ */
 exports.activity = function (req, res) {
     console.log("Activity request received");
     if (req.body.action !== undefined) {

@@ -35,7 +35,11 @@ var handle_error_and_fetch_like_posts = function(err, req, res, person, likes, l
         fetch_like_posts(req, res, person, likes);
     }
 };
-
+/**
+ * This function handles show my likes requests
+ * @param req
+ * @param res
+ */
 var my_likes = function (req, res) {
     var callback = (function (req, res, person) {
         if (person === undefined) {

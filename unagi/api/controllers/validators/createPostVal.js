@@ -6,6 +6,14 @@ var mongoose = require('mongoose'),
 
 var ERR = require('./../consts/errConsts');
 
+
+/**
+ * This function validates if the post request is valid or not and returns it's parent if it exists
+ * @param req
+ * @param res
+ * @param person
+ * @param callback
+ */
 exports.createPostVal = function (req, res, person, callback) {
     if (req.body.Longitude === undefined || req.body.Latitude === undefined) {
         console.log(ERR.LOC_NOT_FOUND_ERROR);

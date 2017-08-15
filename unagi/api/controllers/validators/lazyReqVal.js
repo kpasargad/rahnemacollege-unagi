@@ -2,6 +2,14 @@
 
 const ERR = require('./../consts/errConsts');
 
+
+/**
+ * This function validates the requests made to the server to show nearby recently posted posts
+ * @param req
+ * @param res
+ * @param person
+ * @param callback
+ */
 var lazyReqValidator = function(req, res, person, callback){
     let latitude = req.query.latitude;
     let longitude = req.query.longitude;

@@ -4,6 +4,12 @@ var ERR = require('./../consts/signUpErrConsts');
 var mongoose = require('mongoose'),
     Users = mongoose.model('Users');
 
+/**
+ * This function validates if the sign-up request is valid or not and responds to the user according to the error
+ * @param req
+ * @param res
+ * @param callback
+ */
 exports.user_sign_up_val = function (req, res, callback) {
     let name = req.body.name,
         username = req.body.username,

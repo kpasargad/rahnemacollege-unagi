@@ -11,6 +11,13 @@ var ERR = require('./consts/errConsts');
 //geographic constants:
 const radius = require('./consts/geoConsts').radius;
 
+/**
+ * This function calculates the hotness of an updated post(with / without likes)
+ * @param res
+ * @param post
+ * @param person
+ * @param callback
+ */
 var hotness = function (res, post, person, callback) {
     //TODO: handle errors of unavailable posts.
     var likes = post.number_of_likes;
@@ -22,6 +29,11 @@ var hotness = function (res, post, person, callback) {
 };
 exports.hotness = hotness;
 
+/**
+ * This function calculates the hotness of a new post(without any likes)
+ * @param date
+ * @return {number}
+ */
 var hotnessBaseValue = function (date) {
     var likes = 0;
     console.log("NUMBER OF LIKES = ", likes);
@@ -40,6 +52,13 @@ var handle_error_and_send = function (err, req, res, post, person) {
     }
 };
 
+
+/**
+ * This function handles show hot post request
+ * @param req
+ * @param res
+ * @param person
+ */
 var show_hot_posts = function (req, res, person) {
     let latitude = req.query.latitude;
     let longitude = req.query.longitude;
