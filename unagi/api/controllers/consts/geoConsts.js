@@ -1,7 +1,7 @@
 'use strict';
 
 const DISTANCE_RATE = 111.12;
-const radiusKM = 1000;
+const radiusKM = 10;
 
 module.exports = {
     DISTANCE_RATE: DISTANCE_RATE,
