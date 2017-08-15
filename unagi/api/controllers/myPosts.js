@@ -26,7 +26,7 @@ var fetch_my_posts = function(req, res, post, person) {
 };
 
 
-function handle_error_and_my_posts(err, req, res, post, person, lastPost) {
+var handle_error_and_my_posts = function(err, req, res, post, person, lastPost) {
     if (err) {
         console.log("Request is invalid", lastPost);
         res.send(err);
