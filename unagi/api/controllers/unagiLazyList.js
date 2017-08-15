@@ -23,7 +23,6 @@ exports.fetch_user = fetch_user;
 
 
 
-
 var list_lazy = function (req, res) {
     var callback = (function (req, res, person) {
         if (person === undefined) {
@@ -36,29 +35,51 @@ var list_lazy = function (req, res) {
                 console.log("Someone has requested to see posts " + req.query.latitude + " " + req.query.longitude);
                 let center = [req.query.latitude, req.query.longitude];
                 let lastPost = req.query.lastpost;
-                // var q = post.find({"loc":{"$geoWithin":{"$center":[center, radius]}}}.skip(0).limit(POST_PER_REQ))
-                Post.find({
-                    "id": {
-                        $lt: lastPost
-                    },
-                    "location": {
-                        "$geoWithin": {
-                            "$center": [center, radius]
+                if(lastPost !== undefined) {
+                    // var q = post.find({"loc":{"$geoWithin":{"$center":[center, radius]}}}.skip(0).limit(POST_PER_REQ))
+                    Post.find({
+                        "location": {
+                            "$geoWithin": {
+                                "$center": [center, radius]
+                            }
+                        },
+                        "id": {
+                            $lt: lastPost
                         }
-                    }
-                }, function (err, post) {
-                    if (err) {
-                        console.log("Request is invalid", lastPost);
-                        res.send(err);
-                    } else {
-                        send(req, res, post, person);
-                        try {
-                            console.log("Lastpost : ", post[post.length - 1].timestamp);
-                        } catch (error) {
-                            console.log("There's no post to see.");
+                    }, function (err, post) {
+                        if (err) {
+                            console.log("Request is invalid", lastPost);
+                            res.send(err);
+                        } else {
+                            send(req, res, post, person);
+                            try {
+                                console.log("Lastpost : ", post[post.length - 1].timestamp);
+                            } catch (error) {
+                                console.log("There's no post to see.");
+                            }
                         }
-                    }
-                }).limit(POST_PER_REQ);
+                    }).limit(POST_PER_REQ);
+                }else {
+                    Post.find({
+                        "location": {
+                            "$geoWithin": {
+                                "$center": [center, radius]
+                            }
+                        }
+                    }, function (err, post) {
+                        if (err) {
+                            console.log("Request is invalid", lastPost);
+                            res.send(err);
+                        } else {
+                            send(req, res, post, person);
+                            try {
+                                console.log("Lastpost : ", post[post.length - 1].timestamp);
+                            } catch (error) {
+                                console.log("There's no post to see.");
+                            }
+                        }
+                    }).limit(POST_PER_REQ);
+                }
             };
             lazyReqValidator(req, res, person, afterValidationCB);
         }

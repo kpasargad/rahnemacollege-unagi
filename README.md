@@ -1,77 +1,183 @@
-# Team One Server
-Team One's repository
+# Team One
 
-## UI requests rules
+## Server API
 
-### Tokens
+## General Rules
 
-The tokens are generated in the device and sent to the server; If they do not exist they will be added to the database otherwise their associated user-data will be passed to the called method.
+### Requests format
 
-The server recieves the tokens in any request's query. Here is a sample request to send a post:
+We will demonstrate the requests in `JSON` format here but one can also send the requests in any other format like `x-www-form-urlencoded`.
 
-*The token has to be in 32 characters but applying this restriction is controlled by changing `applyTokenSize` in `Server/unagi/api/controllers/consts/tokenConst.js`.*
+### Activities 
 
-##### Headers:
+Some requests need to get the server's success message to proceed (such as: like, unlike, signup, signin, etc.) so whenever that request has been successful the server sends a `JSON` object with a `success` field to the device; otherwise (if there is a problem with the request) the server sends a json object with a `pop-up-error` field to the device.
 
-```
-POST : localhost:3000/posts?token=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-```
+* If there __exists__ a `success` field and it's value equals `true` then the request has ended in success.
 
-##### Body:
+* A `pop_up_error` field contains a message that can be shown to the user.
 
-```javascript
+### /api
+
+Any request to any url that starts with `/api` has to provide `token`.
+
+## Sign Up
+
+A sign up request looks like:
+
+
+```HTTP
+POST /signup
+Content-Type: application/json;
 {
-	"text" : "Hello Server",
-	"Latitude" : 80.1232,
-	"Longitude" : 12.13453	
+	"username" : username,
+	"password" : password,
+	"email" : email,
+	"name" : name
 }
-
 ```
 
-### Latitude and Longitude
+## Sign In 
 
-Latitude and longitude have to be sent to the server in two types of requests:
+A sign in request looks like:
 
-### Accessing a single post
+```HTTP
+POST /signin
+Content-Type: application/json;
 
-To accsess a single post the post id has to be sent to the server in url params.
-
-#### Example
-``` 
-POST : localhost:3000/posts/[postId]?token=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-
-POST : localhost:3000/posts/12?token=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+{
+	"username" : username,
+	"password" : password,
+	"imei" : imei
+}
 ```
 
-#### 1. Posting a post
+Result:
+
+* __Success__
+
+```HTTP
+{
+    "success": true,
+    "message": "Enjoy your tokens!",
+    "client_id": client_id,
+    "refreshToken": refreshToken,
+    "accessToken": accessToken
+    }
+```
+* __Failure__
+
+```HTTP
+{
+    "success": false,
+    "message": "Authentication failed. Wrong password."
+}
+```
+
+## Seeing posts
+
+There are several urls that the user can request to, to see the posts
+
+* `/api/posts`
+* `/api/hot`
+* `/api/myposts`
+* `/api/mylikes`
+
+In each request 20 posts are sent.
+
+### General Rules
+
+
+### `/api/posts`
+
+This method is used to see the posts nearby.
+
+One has to send `latitude`, `longitude` and `lastpost`(optional) to see the posts.
+`lastpost` is the `id` of the last post which has been sent to the device.
+
+If there is no `lastpost` provided the server will send the latest posts.
+
+#### example
+
+```HTTP
+GET /api/posts?token=yourtoken&latitude=35&longitude=50&lastpost=12
+```
+
+### `/api/hot`
+
+This method is used to see the hot posts nearby.
+
+One has to send `latitude`, `longitude` and `lasthotness`(optional) to see the posts.
+`lasthotness` is the `hotness` of the last post which has been sent to the device.
+
+If there is no `lasthotness` provided the server will send the hottest posts.
+
+#### example
+
+```HTTP
+GET /api/hot?token=yourtoken&latitude=35&longitude=50&lasthotness=9000
+```
+
+### `/api/myposts`
+
+This method is used to see the recent posts of the user.
+
+One has to send `lastpost`(optional) to see the posts.
+`lastpost` is the `id` of the last post which has been sent to the device.
+
+If there is no `lastpost` provided the server will send the latest posts.
+
+#### example
+
+```HTTP
+GET /api/myposts?token=yourtoken&lastpost=12
+```
+### `/api/mylikes`
+
+This method is used to see the posts that this user has recently liked.
+
+One has to send `lastlikeid`(optional) to see the posts.
+`lastpost` is the `like_id` of the last post which has been sent to the device.
+
+If there is no `lastlikeid` provided the server will send the latest posts.
+
+#### example
+
+```HTTP
+GET /api/mylikes?token=yourtoken&lastpost=12
+```
+
+## Posting a post and replying
+
+### Posting a post
 
 When the device is posting a post the location has to be sent in the body.
 
-##### Example
+##### example
 
-```javascript
+```HTTP
+POST /posts
+Content-Type: application/json;
+
 {
 	"text" : "Hello Server",
 	"Latitude" : 80.1232,
 	"Longitude" : 12.13453	
 }
-
 ```
 
-#### 2. Requesting to see posts
+### Replying to a post
 
-The device has to send the location in the header query when it wants to send a request to see the posts. 
 
-#### Example
 
-``` 
-GET : localhost:3000/posts?latitude=50&longitude=50&token=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-```
-### 3. Actions on posts
+
+
+
+## Actions on posts
 
 The client has to send a POST request to `/posts/activity` with `token` as it's header and send the `ActionType` and `postId` in body.
 
-##### Example for liking a post
+##### example
+
 ```javascript
 POST:localhost:3000/posts/activity?token=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 
@@ -139,13 +245,3 @@ The results are sent in an array of posts, and each post consists of the followi
     }
 ]
 ```
-
-### Activities results
-
-The server sends a JSON which it might contain one of the following fields:
-
-`success` (which means the activity has been finished successfully)
-
-`pop_up_error` (An error (mostly an exception) with a messege)
-
-or none of the above which it might be because of database failures.

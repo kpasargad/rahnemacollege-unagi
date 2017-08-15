@@ -52,8 +52,8 @@ var PostSchema = new Schema({
     // }
 });
 
-PostSchema.index({timestamp: -1, location: 1});
-PostSchema.index({id: -1, location: 1});
+PostSchema.index({location: 1, timestamp: -1});
+PostSchema.index({location: 1, id: -1});
 PostSchema.index({id: 1});
 PostSchema.index({parent_id: 1});
 PostSchema.index({author_id: 1, timestamp: -1});

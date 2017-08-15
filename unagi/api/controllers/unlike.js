@@ -81,12 +81,6 @@ var notLiked = function (res, post, person) {
 };
 
 
-/**
- * This function handles unlike requests.
- * @param req
- * @param res
- * @param person
- */
 var fetch_post = function (req, res, person) {
     if (person === undefined) {
         console.log(ERR.USER_ERROR);
@@ -115,6 +109,11 @@ var fetch_post = function (req, res, person) {
     }
 };
 
+/**
+ * This function handles unlike requests.
+ * @param req
+ * @param res
+ */
 exports.unlike_a_post = function (req, res) {
     console.log("A request to like a post has been received.");
     fetch_user(req, res, fetch_post);

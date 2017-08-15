@@ -46,34 +46,57 @@ var show_hot_posts = function (req, res, person) {
         res.send({
             pop_up_error: ERR.LOC_NOT_VALID_ERROR
         });
-    } else if (lastPost === undefined) {
-        res.send({
-            pop_up_error: "No last hotness has been sent to server"
-        })
     } else {
         let center = [latitude, longitude];
-
-        Post.find({
-            "hotness": {
-                $lt: lastPost
-            },
-            "location": {
-                "$geoWithin": {
-                    "$center": [center, radius]
+        if (lastPost === undefined) {
+            Post.find({
+                "location": {
+                    "$geoWithin": {
+                        "$center": [center, radius]
+                    }
                 }
-            }
-        })
-            .sort({
-                hotness: -1
             })
-            .limit(10)
-            .exec(function (err, post) {
-                if (err) {
-                    res.send(err);
-                } else {
-                    send(req, res, post, person);
-                }
-            });
+                .sort({
+                    hotness: -1
+                })
+                .limit(10)
+                .exec(function (err, post) {
+                    if (err) {
+                        res.send(err);
+                    } else {
+                        send(req, res, post, person);
+                    }
+                });
+        } else {
+            if(isNaN(lastPost)){
+                res.send({
+                    pop_up_error:ERR.LAST_POST_NOT_VALID_ERROR
+                })
+            }
+            else {
+                Post.find({
+                    "location": {
+                        "$geoWithin": {
+                            "$center": [center, radius]
+                        }
+                    },
+                    "hotness": {
+                        $lt: lastPost
+                    }
+                })
+                    .sort({
+                        hotness: -1
+                    })
+                    .limit(10)
+                    .exec(function (err, post) {
+                        if (err) {
+                            res.send(err);
+                        } else {
+                            send(req, res, post, person);
+                        }
+                    });
+            }
+        }
     }
 };
 
