@@ -52,8 +52,9 @@ var PostSchema = new Schema({
     // }
 });
 
-PostSchema.index({location: 1, timestamp: -1});
-PostSchema.index({location: 1, id: -1});
+// PostSchema.index({location: 1, timestamp: -1}); // Removed this index
+PostSchema.index({ location: "2dsphere" }); // Added 2dsphere index
+PostSchema.index({location: 1, id: -1}); // Kept this one, might be for different queries
 PostSchema.index({id: 1});
 PostSchema.index({parent_id: 1});
 PostSchema.index({author_id: 1, timestamp: -1});
@@ -74,7 +75,6 @@ var UserSchema = new Schema({
         required: true
     },
     password: {
-        //TODO: to be hashed
         type: String,
         required: true
     },
@@ -102,8 +102,8 @@ var actionsSchema = new Schema({
         required: true
     },
     like: {
-        type: Number,
-        default: 0,
+        type: Boolean,
+        default: false, // Assuming default is 'not liked'
         required: true
     },
     share: {
@@ -148,22 +148,24 @@ var authSchema = new Schema({
     }
 });
 
+// Schema for storing global counters for custom numeric IDs.
 var infoSchema = new Schema({
-    number_of_user_requests: {
+    number_of_user_requests: { // Counter for generating User.id
         type: Number,
         default: 2000,
         required: true
     },
-    number_of_actions_requests: {
+    post_id_counter: { // Counter for generating Post.id (formerly number_of_actions_requests)
         type: Number,
         default: 2000,
         required: true
     },
-    number_of_action_requests: {
+    action_document_id_counter: { // Counter for generating Actions.id
         type: Number,
         default: 2000,
         required: true
     }
+    // counter_for_actions_collection was removed as it was found to be unused.
 });
 
 module.exports = {
