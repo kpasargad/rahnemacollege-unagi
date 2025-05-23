@@ -5,14 +5,20 @@ var express = require("express"),
     router = express.Router(),
     User = require("./../models/unagiModel").users,
     config = require("./../../config"),
-    unagi = require("./../controllers/unagiController"),
+    listLazy = require("./../controllers/post/listLazy"),
+    hotPosts = require("./../controllers/post/hotPosts"),
+    createPost = require("./../controllers/post/createPost"),
+    singleRead = require("./../controllers/post/singleRead"),
+    myPosts = require("./../controllers/post/myPosts"),
+    myLikes = require("./../controllers/post/myLikes"),
+    activity = require("./../controllers/post/activity"),
     jwt = require("jsonwebtoken"),
-    userValidator = require("./../controllers/validators/createUserVal")
+    userValidator = require("./../services/validators/createUserVal")
         .user_sign_up_val,
-    signinModule = require("./../controllers/authentication/signin"),
-    signupModule = require("./../controllers/authentication/signup"),
-    authModule = require("./../controllers/authentication/authenticate"),
-    signoutModule = require("./../controllers/authentication/signout");
+    signinModule = require("./../services/authentication/signin"),
+    signupModule = require("./../services/authentication/signup"),
+    authModule = require("./../services/authentication/authenticate"),
+    signoutModule = require("./../services/authentication/signout");
 
 app.set("superSecret", config.secret);
 
@@ -67,20 +73,20 @@ router.get("/api/checktoken", authModule.authenticateAccessToken, function(
     });
 });
 
-router.get("/api/posts", unagi.list_lazy);
+router.get("/api/posts", listLazy.list_lazy);
 
-router.post("/api/posts", unagi.create_a_post);
+router.post("/api/posts", createPost.create_a_post);
 
-router.get("/api/posts/:postId", unagi.read_a_post);
+router.get("/api/posts/:postId", singleRead.read_a_post);
 
-router.get("/api/hot", unagi.list_hot_posts);
+router.get("/api/hot", hotPosts.list_hot_posts);
 
-router.get("/api/myposts", unagi.my_posts);
+router.get("/api/myposts", myPosts.my_posts);
 
-router.get("/api/mylikes", unagi.my_likes);
+router.get("/api/mylikes", myLikes.my_likes);
 
 //router.get("api/posts/liked", unagi.liked_posts);
 
-router.post("/api/posts/activity", unagi.activity);
+router.post("/api/posts/activity", activity.activity);
 
 module.exports.router = router;
